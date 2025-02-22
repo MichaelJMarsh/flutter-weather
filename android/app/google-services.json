@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "126812901932",
+    "project_id": "flutter-weather-ae0c7",
+    "storage_bucket": "flutter-weather-ae0c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126812901932:android:368410e5934ac09ac7b789",
+        "android_client_info": {
+          "package_name": "com.example.flutter_weather"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcnZy7fvuRRLNUVc3-VzRD_aBP2bWOgok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126812901932:android:5d1cca80898f4ce9c7b789",
+        "android_client_info": {
+          "package_name": "com.flutterweather"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcnZy7fvuRRLNUVc3-VzRD_aBP2bWOgok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
