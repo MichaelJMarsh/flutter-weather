@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:data/data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter_weather/config/firebase_options.dart';
 
@@ -19,6 +20,9 @@ class Bootstrap {
   /// created [FlutterWeatherApp].
   static Future<FlutterWeatherApp> initializeApp() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Load the .env file.
+    await dotenv.load();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
