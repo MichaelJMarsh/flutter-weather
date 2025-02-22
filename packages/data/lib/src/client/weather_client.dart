@@ -6,11 +6,11 @@ import 'package:http/http.dart' as http;
 /// A client for fetching weather data from OpenWeatherMap.
 class WeatherClient implements WeatherService {
   /// Creates a new instance of [WeatherClient].
-  WeatherClient({required String apiKey, http.Client? client})
+  WeatherClient({required String? apiKey, http.Client? client})
     : _apiKey = apiKey,
       _client = client ?? http.Client();
 
-  final String _apiKey;
+  final String? _apiKey;
   final http.Client _client;
 
   // Free API Base URL
@@ -21,6 +21,10 @@ class WeatherClient implements WeatherService {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
+    if (_apiKey == null || _apiKey.isEmpty) {
+      throw Exception('API key is missing or invalid.');
+    }
+
     // Example coordinates (New York). Update dynamically as needed.
     final double latitude = 40.7128;
     final double longitude = -74.0060;
