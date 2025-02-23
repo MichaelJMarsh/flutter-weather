@@ -15,6 +15,8 @@ void main() {
   late WeatherClient client;
 
   const apiKey = 'test-api-key';
+  const double testLat = 30.2672;
+  const double testLon = -97.7431; // Austin, TX
 
   setUp(() {
     mockHttpClient = MockClient();
@@ -22,14 +24,93 @@ void main() {
   });
 
   group('WeatherClient', () {
-    group('getWeather', () {
+    group('getCurrentWeather', () {
       test(
-        'returns a list of WeatherData when status code is 200 with valid JSON',
+        'returns CurrentWeather when status code is 200 with valid JSON',
         () async {
           final mockResponse = jsonEncode({
-            'main': {'temp': 22.5, 'humidity': 55},
+            'main': {'temp': 25.5, 'feels_like': 23.0, 'humidity': 60},
             'weather': [
-              {'description': 'light rain', 'icon': '10d'},
+              {'description': 'clear sky', 'icon': '01d'},
+            ],
+            'dt': 1638300000,
+          });
+
+          when(mockHttpClient.get(any)).thenAnswer(
+            (_) async => http.Response(
+              mockResponse,
+              200,
+              headers: {'Content-Type': 'application/json'},
+            ),
+          );
+
+          final result = await client.getCurrentWeather(
+            lat: testLat,
+            lon: testLon,
+          );
+
+          expect(result.temperature, 25.5);
+          expect(result.feelsLikeTemperature, 23.0);
+          expect(result.humidity, 60);
+          expect(result.description, 'clear sky');
+          expect(result.iconCode, '01d');
+        },
+      );
+
+      test('throws an exception if status code is not 200', () async {
+        when(
+          mockHttpClient.get(any),
+        ).thenAnswer((_) async => http.Response('Unauthorized', 401));
+
+        expect(
+          () => client.getCurrentWeather(lat: testLat, lon: testLon),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('throws an exception if the response body is empty', () async {
+        when(
+          mockHttpClient.get(any),
+        ).thenAnswer((_) async => http.Response('', 200));
+
+        expect(
+          () => client.getCurrentWeather(lat: testLat, lon: testLon),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('throws an exception if JSON is malformed', () async {
+        when(mockHttpClient.get(any)).thenAnswer(
+          (_) async => http.Response('{"invalid_key": "missing_data"}', 200),
+        );
+
+        expect(
+          () => client.getCurrentWeather(lat: testLat, lon: testLon),
+          throwsA(isA<Exception>()),
+        );
+      });
+    });
+
+    group('getHourlyForecast', () {
+      test(
+        'returns a list of HourlyForecast when status code is 200 with valid JSON',
+        () async {
+          final mockResponse = jsonEncode({
+            'list': [
+              {
+                'dt': 1638303600,
+                'main': {'temp': 26.0},
+                'weather': [
+                  {'icon': '02d'},
+                ],
+              },
+              {
+                'dt': 1638310800,
+                'main': {'temp': 27.5},
+                'weather': [
+                  {'icon': '03d'},
+                ],
+              },
             ],
           });
 
@@ -41,16 +122,16 @@ void main() {
             ),
           );
 
-          final result = await client.getWeather(
-            startDate: DateTime(2023, 5, 1),
-            endDate: DateTime(2023, 5, 7),
+          final result = await client.getHourlyForecast(
+            lat: testLat,
+            lon: testLon,
           );
 
-          expect(result.length, 1);
-          expect(result[0].temperature, 22.5);
-          expect(result[0].humidity, 55);
-          expect(result[0].description, 'light rain');
-          expect(result[0].icon, '10d');
+          expect(result.length, 2);
+          expect(result[0].temperature, 26.0);
+          expect(result[0].iconCode, '02d');
+          expect(result[1].temperature, 27.5);
+          expect(result[1].iconCode, '03d');
         },
       );
 
@@ -67,9 +148,9 @@ void main() {
             ),
           );
 
-          final result = await client.getWeather(
-            startDate: DateTime(2023, 5, 1),
-            endDate: DateTime(2023, 5, 7),
+          final result = await client.getHourlyForecast(
+            lat: testLat,
+            lon: testLon,
           );
 
           expect(result, isEmpty);
@@ -79,13 +160,19 @@ void main() {
       test('throws an exception if status code is not 200', () async {
         when(
           mockHttpClient.get(any),
-        ).thenAnswer((_) async => http.Response('Unauthorized', 401));
+        ).thenAnswer((_) async => http.Response('Not Found', 404));
 
         expect(
-          () => client.getWeather(
-            startDate: DateTime(2023, 5, 1),
-            endDate: DateTime(2023, 5, 7),
-          ),
+          () => client.getHourlyForecast(lat: testLat, lon: testLon),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('throws an exception if API key is missing', () {
+        final invalidClient = WeatherClient(apiKey: '', client: mockHttpClient);
+
+        expect(
+          () => invalidClient.getHourlyForecast(lat: testLat, lon: testLon),
           throwsA(isA<Exception>()),
         );
       });

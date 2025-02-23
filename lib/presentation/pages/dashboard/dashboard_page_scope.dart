@@ -1,56 +1,72 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 
 import 'package:domain/domain.dart';
 import 'package:provider/provider.dart';
 
+/// Dashboard scope responsible for fetching and storing weather data.
 class DashboardPageScope extends ChangeNotifier {
-  /// Creates a new [DashboardPageScope].
   DashboardPageScope({required WeatherService weatherService})
     : _weatherService = weatherService;
 
-  /// Creates a new [DashboardPageScope] from the [context].
+  /// Retrieves an instance from the widget tree.
   factory DashboardPageScope.of(final BuildContext context) {
     return DashboardPageScope(weatherService: context.read<WeatherService>());
   }
 
   final WeatherService _weatherService;
 
-  /// Whether the page is loading.
-  bool get isLoading => _isLoading;
   bool _isLoading = true;
+  bool get isLoading => _isLoading;
 
-  /// The list of fetched [WeatherData].
-  List<WeatherData> get weatherDataList => _weatherDataList;
-  List<WeatherData> _weatherDataList = [];
+  CurrentWeather? _currentWeather;
+  CurrentWeather? get currentWeather => _currentWeather;
 
-  /// Initializes the dashboard by loading initial weather data.
+  List<HourlyForecast> _hourlyForecast = [];
+  List<HourlyForecast> get hourlyForecast => _hourlyForecast;
+
+  List<DailyForecast> _dailyForecast = [];
+  List<DailyForecast> get dailyForecast => _dailyForecast;
+
+  /// Initializes the dashboard by loading weather data.
   Future<void> initialize() async {
     await loadWeatherData();
-
     _isLoading = false;
     notifyListeners();
   }
 
-  /// Loads weather data for the current date range.
-  ///
-  /// In a real scenario, you'd pass actual [startDate] & [endDate], but
-  /// here's a simple method to demonstrate usage.
-  Future<void> loadWeatherData({DateTime? startDate, DateTime? endDate}) async {
+  /// Loads current weather, hourly forecast, and daily forecast.
+  Future<void> loadWeatherData() async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      final now = DateTime.now();
-      final start = startDate ?? now.subtract(const Duration(days: 7));
-      final end = endDate ?? now;
+      // Example coordinates (Austin, TX)
+      const double lat = 30.2672;
+      const double lon = -97.7431;
 
-      final weatherList = await _weatherService.getWeather(
-        startDate: start,
-        endDate: end,
+      // Fetch current weather
+      final current = await _weatherService.getCurrentWeather(
+        lat: lat,
+        lon: lon,
       );
-      _weatherDataList = weatherList;
+      _currentWeather = current;
+
+      // Fetch hourly forecast
+      final hourly = await _weatherService.getHourlyForecast(
+        lat: lat,
+        lon: lon,
+      );
+      _hourlyForecast = hourly;
+
+      // Fetch daily forecast
+      final daily = await _weatherService.getDailyForecast(lat: lat, lon: lon);
+      _dailyForecast = daily;
+    } catch (e) {
+      // ToDo: Handle error appropriately (logging, error state, etc.)
+
+      _currentWeather = null;
+      _hourlyForecast = [];
+      _dailyForecast = [];
     } finally {
       _isLoading = false;
       notifyListeners();

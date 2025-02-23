@@ -1,5 +1,8 @@
 // Models
-export 'src/model/weather_data.dart';
+export 'src/model/current_weather.dart';
+export 'src/model/daily_forecast.dart';
+export 'src/model/hourly_forecast.dart';
+export 'src/model/weather_forecast.dart';
 
 // Services
 export 'src/service/share.dart';
