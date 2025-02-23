@@ -1,4 +1,5 @@
 // Models
+export 'src/model/coordinates.dart';
 export 'src/model/current_weather.dart';
 export 'src/model/daily_forecast.dart';
 export 'src/model/hourly_forecast.dart';

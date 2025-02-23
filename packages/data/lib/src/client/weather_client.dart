@@ -1,46 +1,46 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:domain/domain.dart';
 import 'package:http/http.dart' as http;
 
 /// A client for fetching weather data from OpenWeather's Free APIs.
 class WeatherClient implements WeatherService {
+  /// Creates a new [WeatherClient].
   WeatherClient({required String? apiKey, http.Client? client})
     : _apiKey = apiKey,
       _client = client ?? http.Client();
 
+  /// The key used to authenticate with the OpenWeather API.
   final String? _apiKey;
+
+  /// The HTTP client used to make requests.
   final http.Client _client;
 
-  static const String _baseUrl = 'https://api.openweathermap.org';
+  /// The base URL path for the OpenWeather API.
+  static const _baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   @override
   Future<CurrentWeather> getCurrentWeather({
-    required double lat,
-    required double lon,
+    required Coordinates coordinates,
   }) async {
-    if (_apiKey == null || _apiKey.isEmpty) {
-      throw Exception('API key is missing or invalid.');
-    }
+    if (_apiKey == null || _apiKey.isEmpty) throw MissingApiKeyException();
 
-    final uri = Uri.parse('$_baseUrl/data/2.5/weather').replace(
-      queryParameters: {
-        'lat': lat.toString(),
-        'lon': lon.toString(),
-        'appid': _apiKey,
-        'units': 'metric',
-      },
+    final uri = _getCoordinatesURI(
+      path: '$_baseUrl/weather',
+      coordinates: coordinates,
     );
 
     final response = await _client.get(uri);
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == _HttpStatusCode.unauthorized.code) {
       throw Exception(
         'Invalid API Key. Get a free one at https://openweathermap.org/api.',
       );
     }
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != _HttpStatusCode.successful.code) {
       throw Exception(
         'Failed to load current weather. Status code: ${response.statusCode}\nResponse: ${response.body}',
       );
@@ -52,31 +52,22 @@ class WeatherClient implements WeatherService {
 
   @override
   Future<List<HourlyForecast>> getHourlyForecast({
-    required double lat,
-    required double lon,
+    required Coordinates coordinates,
   }) async {
-    if (_apiKey == null || _apiKey.isEmpty) {
-      throw Exception('API key is missing or invalid.');
-    }
+    if (_apiKey == null || _apiKey.isEmpty) throw MissingApiKeyException();
 
-    final uri = Uri.parse('$_baseUrl/data/2.5/forecast').replace(
-      queryParameters: {
-        'lat': lat.toString(),
-        'lon': lon.toString(),
-        'appid': _apiKey,
-        'units': 'metric',
-      },
+    final uri = _getCoordinatesURI(
+      path: '$_baseUrl/forecast',
+      coordinates: coordinates,
     );
 
     final response = await _client.get(uri);
 
-    if (response.statusCode == 401) {
-      throw Exception(
-        'Invalid API Key. Get a free one at https://openweathermap.org/api.',
-      );
+    if (response.statusCode == _HttpStatusCode.unauthorized.code) {
+      throw InvalidApiKeyException();
     }
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != _HttpStatusCode.successful.code) {
       throw Exception(
         'Failed to load hourly forecast. Status code: ${response.statusCode}\nResponse: ${response.body}',
       );
@@ -92,31 +83,22 @@ class WeatherClient implements WeatherService {
 
   @override
   Future<List<DailyForecast>> getDailyForecast({
-    required double lat,
-    required double lon,
+    required Coordinates coordinates,
   }) async {
-    if (_apiKey == null || _apiKey.isEmpty) {
-      throw Exception('API key is missing or invalid.');
-    }
+    if (_apiKey == null || _apiKey.isEmpty) throw MissingApiKeyException();
 
-    final uri = Uri.parse('$_baseUrl/data/2.5/forecast').replace(
-      queryParameters: {
-        'lat': lat.toString(),
-        'lon': lon.toString(),
-        'appid': _apiKey,
-        'units': 'metric',
-      },
+    final uri = _getCoordinatesURI(
+      path: '$_baseUrl/forecast',
+      coordinates: coordinates,
     );
 
     final response = await _client.get(uri);
 
-    if (response.statusCode == 401) {
-      throw Exception(
-        'Invalid API Key. Get a free one at https://openweathermap.org/api.',
-      );
+    if (response.statusCode == _HttpStatusCode.unauthorized.code) {
+      throw InvalidApiKeyException();
     }
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != _HttpStatusCode.successful.code) {
       throw Exception(
         'Failed to load daily forecast. Status code: ${response.statusCode}\nResponse: ${response.body}',
       );
@@ -125,8 +107,8 @@ class WeatherClient implements WeatherService {
     final jsonBody = json.decode(response.body) as Map<String, dynamic>;
     final List<dynamic> forecastList = jsonBody['list'] ?? [];
 
-    // Extract daily summaries from 3-hour forecast data
-    final Map<int, List<HourlyForecast>> groupedByDay = {};
+    // Extract daily summaries from 3-hour forecast data.
+    final groupedByDay = <int, List<HourlyForecast>>{};
 
     for (final data in forecastList) {
       final hourlyData = HourlyForecast.fromJson(data as Map<String, dynamic>);
@@ -142,12 +124,12 @@ class WeatherClient implements WeatherService {
 
     return groupedByDay.values.map((forecasts) {
       final firstEntry = forecasts.first;
-      final minTemp = forecasts
-          .map((e) => e.temperature)
-          .reduce((a, b) => a < b ? a : b);
-      final maxTemp = forecasts
-          .map((e) => e.temperature)
-          .reduce((a, b) => a > b ? a : b);
+      final hourlyTempertures = forecasts.map(
+        (hourlyForecast) => hourlyForecast.temperature,
+      );
+
+      final minTemp = hourlyTempertures.reduce((a, b) => a < b ? a : b);
+      final maxTemp = hourlyTempertures.reduce((a, b) => a > b ? a : b);
 
       return DailyForecast(
         timestamp: firstEntry.timestamp,
@@ -158,4 +140,72 @@ class WeatherClient implements WeatherService {
       );
     }).toList();
   }
+
+  /// Returns the Uri for the [path] with the given [coordinates].
+  Uri _getCoordinatesURI({
+    required String path,
+    required Coordinates coordinates,
+    String units = 'metric',
+  }) {
+    return Uri.parse(path).replace(
+      queryParameters: {
+        _QueryParameter.latitude: coordinates.latitude.toString(),
+        _QueryParameter.longitude: coordinates.longitude.toString(),
+        _QueryParameter.appId: _apiKey,
+        _QueryParameter.units: units,
+      },
+    );
+  }
+}
+
+/// An exception thrown when an invalid API key is detected.
+@visibleForTesting
+class InvalidApiKeyException implements Exception {
+  /// Creates a new [InvalidApiKeyException].
+  InvalidApiKeyException()
+    : message =
+          'Invalid API Key. Get a free one at https://openweathermap.org/api.';
+
+  final String message;
+}
+
+/// An exception thrown when an API key is missing or invalid.
+@visibleForTesting
+class MissingApiKeyException implements Exception {
+  /// Creates a new [MissingApiKeyException].
+  MissingApiKeyException() : message = 'API key is missing or invalid.';
+
+  final String message;
+}
+
+/// Contains the query parameters used in the OpenWeather API.
+@immutable
+abstract class _QueryParameter {
+  const _QueryParameter._();
+
+  /// The latitude of the location.
+  static const latitude = 'lat';
+
+  /// The longitude of the location.
+  static const longitude = 'lon';
+
+  /// The app ID for the OpenWeather API.
+  static const appId = 'appid';
+
+  /// The units of measurement for the weather data.
+  static const units = 'units';
+}
+
+/// The status code for a http response.
+enum _HttpStatusCode {
+  /// The status code for a successful request.
+  successful(code: 200),
+
+  /// The status code for an unauthorized request.
+  unauthorized(code: 401);
+
+  const _HttpStatusCode({required this.code});
+
+  /// The status code for the current http response.
+  final int code;
 }
