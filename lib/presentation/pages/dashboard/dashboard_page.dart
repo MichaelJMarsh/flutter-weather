@@ -113,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage>
                   animation: _entranceAnimations.dailyForecastHeader,
                   pixels: 40,
                   child: Text(
-                    '7-DAY FORECAST',
+                    '5-DAY FORECAST',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

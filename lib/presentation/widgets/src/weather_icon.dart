@@ -16,7 +16,7 @@ class WeatherIcon extends StatelessWidget {
     '01d': '☀️', // Clear sky (day)
     '01n': '🌙', // Clear sky (night)
     '02d': '🌤️', // Few clouds (day)
-    '02n': '🌙☁️', // Few clouds (night)
+    '02n': '☁️', // Few clouds (night)
     '03d': '☁️', // Scattered clouds
     '03n': '☁️', // Scattered clouds
     '04d': '☁️', // Broken clouds

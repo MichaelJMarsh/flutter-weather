@@ -138,7 +138,6 @@ class WeatherClient implements WeatherService {
       groupedByDay.putIfAbsent(dayKey, () => []).add(hourlyData);
     }
 
-    // Build DailyForecast objects for each local day
     final dailyForecasts =
         groupedByDay.values.map((forecasts) {
           // Sort each day's 3-hour block by time, just in case
@@ -159,9 +158,9 @@ class WeatherClient implements WeatherService {
           );
         }).toList();
 
-    // Sort final daily list by date, then take 7
+    // Sort final daily list by date.
     dailyForecasts.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    return dailyForecasts.take(7).toList();
+    return dailyForecasts.toList();
   }
 
   /// Returns the Uri for the [path] with the given [coordinates].
