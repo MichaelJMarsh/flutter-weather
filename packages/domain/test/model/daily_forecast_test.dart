@@ -14,7 +14,7 @@ void main() {
     final forecast = DailyForecast.fromJson(testJson);
 
     test('parses timestamp and dateTime correctly', () {
-      expect(forecast.timestamp, 1638320000);
+      expect(forecast.timestamp, equals(1638320000));
       final expectedDateTime = DateTime.fromMillisecondsSinceEpoch(
         1638320000 * 1000,
         isUtc: true,
@@ -23,9 +23,9 @@ void main() {
     });
 
     test('parses minTemperature, maxTemperature, and iconCode correctly', () {
-      expect(forecast.minTemperature, 10.0);
-      expect(forecast.maxTemperature, 22.0);
-      expect(forecast.iconCode, '03d');
+      expect(forecast.minTemperature, equals(10.0));
+      expect(forecast.maxTemperature, equals(22.0));
+      expect(forecast.iconCode, equals('03d'));
     });
 
     test('equality and hashCode work correctly', () {
@@ -35,7 +35,7 @@ void main() {
     });
 
     test('toString returns a non-empty string', () {
-      expect(forecast.toString().isNotEmpty, true);
+      expect(forecast.toString().isNotEmpty, isTrue);
     });
   });
 }

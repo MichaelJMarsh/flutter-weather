@@ -5,9 +5,7 @@ void main() {
   group('CurrentWeather', () {
     final testJson = {
       'dt': 1638300000,
-      'temp': 18.5,
-      'feels_like': 17.0,
-      'humidity': 80,
+      'main': {'temp': 18.5, 'feels_like': 17.0, 'humidity': 80},
       'weather': [
         {'description': 'clear sky', 'icon': '01d'},
       ],
@@ -17,25 +15,24 @@ void main() {
 
     test('parses timestamp and dateTime correctly', () {
       expect(weather.timestamp, 1638300000);
-      final expectedDateTime = DateTime.fromMillisecondsSinceEpoch(
-        1638300000 * 1000,
-        isUtc: true,
+      expect(
+        weather.dateTime,
+        DateTime.fromMillisecondsSinceEpoch(1638300000 * 1000, isUtc: true),
       );
-      expect(weather.dateTime, equals(expectedDateTime));
     });
 
     test(
       'parses temperature, feelsLikeTemperature, and humidity correctly',
       () {
-        expect(weather.temperature, 18.5);
-        expect(weather.feelsLikeTemperature, 17.0);
-        expect(weather.humidity, 80);
+        expect(weather.temperature, equals(18.5));
+        expect(weather.feelsLikeTemperature, equals(17.0));
+        expect(weather.humidity, equals(80));
       },
     );
 
     test('parses description and iconCode correctly', () {
-      expect(weather.description, 'clear sky');
-      expect(weather.iconCode, '01d');
+      expect(weather.description, equals('clear sky'));
+      expect(weather.iconCode, equals('01d'));
     });
 
     test('equality and hashCode work correctly', () {

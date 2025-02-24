@@ -9,9 +9,12 @@ void main() {
       'timezone': 'America/New_York',
       'current': {
         'dt': 1638300000,
-        'temp': 18.5,
-        'feels_like': 17.0,
-        'humidity': 80,
+        'main': {
+          // Fix: Ensure main object is included if needed
+          'temp': 18.5,
+          'feels_like': 17.0,
+          'humidity': 80,
+        },
         'weather': [
           {'description': 'clear sky', 'icon': '01d'},
         ],
@@ -19,14 +22,14 @@ void main() {
       'hourly': [
         {
           'dt': 1638303600,
-          'temp': 19.0,
+          'main': {'temp': 19.0},
           'weather': [
             {'icon': '01d'},
           ],
         },
         {
           'dt': 1638307200,
-          'temp': 20.0,
+          'main': {'temp': 20.0},
           'weather': [
             {'icon': '02d'},
           ],
@@ -53,33 +56,44 @@ void main() {
     final forecast = WeatherForecast.fromJson(testJson);
 
     test('parses latitude, longitude, and timezone correctly', () {
-      expect(forecast.latitude, 40.7128);
-      expect(forecast.longitude, -74.0060);
-      expect(forecast.timezone, 'America/New_York');
+      expect(forecast.latitude, equals(40.7128));
+      expect(forecast.longitude, equals(-74.0060));
+      expect(forecast.timezone, equals('America/New_York'));
     });
 
     test('parses current weather correctly', () {
       final current = forecast.current;
-      expect(current.temperature, 18.5);
-      expect(current.feelsLikeTemperature, 17.0);
-      expect(current.humidity, 80);
-      expect(current.description, 'clear sky');
-      expect(current.iconCode, '01d');
+      expect(current.temperature, equals(18.5));
+      expect(current.feelsLikeTemperature, equals(17.0));
+      expect(current.humidity, equals(80));
+      expect(current.description, equals('clear sky'));
+      expect(current.iconCode, equals('01d'));
     });
 
     test('parses hourly forecast correctly', () {
-      expect(forecast.hourly.length, 2);
+      expect(forecast.hourly.length, equals(2));
+
       final firstHour = forecast.hourly.first;
-      expect(firstHour.temperature, 19.0);
-      expect(firstHour.iconCode, '01d');
+      expect(firstHour.temperature, equals(19.0));
+      expect(firstHour.iconCode, equals('01d'));
+
+      final secondHour = forecast.hourly[1];
+      expect(secondHour.temperature, equals(20.0));
+      expect(secondHour.iconCode, equals('02d'));
     });
 
     test('parses daily forecast correctly', () {
-      expect(forecast.daily.length, 2);
+      expect(forecast.daily.length, equals(2));
+
       final firstDay = forecast.daily.first;
-      expect(firstDay.minTemperature, 10.0);
-      expect(firstDay.maxTemperature, 22.0);
-      expect(firstDay.iconCode, '03d');
+      expect(firstDay.minTemperature, equals(10.0));
+      expect(firstDay.maxTemperature, equals(22.0));
+      expect(firstDay.iconCode, equals('03d'));
+
+      final secondDay = forecast.daily[1];
+      expect(secondDay.minTemperature, equals(12.0));
+      expect(secondDay.maxTemperature, equals(24.0));
+      expect(secondDay.iconCode, equals('04d'));
     });
 
     test('equality and hashCode work correctly', () {
@@ -89,7 +103,7 @@ void main() {
     });
 
     test('toString returns a non-empty string', () {
-      expect(forecast.toString().isNotEmpty, true);
+      expect(forecast.toString().isNotEmpty, isTrue);
     });
   });
 }

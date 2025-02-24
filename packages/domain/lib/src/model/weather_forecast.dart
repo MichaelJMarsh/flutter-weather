@@ -40,8 +40,10 @@ class WeatherForecast {
   /// Creates an instance from JSON data.
   factory WeatherForecast.fromJson(Map<String, dynamic> json) {
     return WeatherForecast(
-      latitude: (json[WeatherForecastField.latitude] as num).toDouble(),
-      longitude: (json[WeatherForecastField.longitude] as num).toDouble(),
+      latitude:
+          (json[WeatherForecastField.latitude] as num?)?.toDouble() ?? 0.0,
+      longitude:
+          (json[WeatherForecastField.longitude] as num?)?.toDouble() ?? 0.0,
       timezone: json[WeatherForecastField.timezone] as String? ?? 'Unknown',
       current: CurrentWeather.fromJson(json[WeatherForecastField.current]),
       hourly: _parseHourly(json),
@@ -66,18 +68,6 @@ class WeatherForecast {
   }
 
   @override
-  String toString() {
-    return '''WeatherForecast(
-    latitude: $latitude, 
-    longitude: $longitude, 
-    timezone: $timezone, 
-    current: $current, 
-    hourly: $hourly, 
-    daily: $daily,
-    )''';
-  }
-
-  @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
@@ -92,14 +82,27 @@ class WeatherForecast {
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      latitude.hashCode ^
-      longitude.hashCode ^
-      timezone.hashCode ^
-      current.hashCode ^
-      const ListEquality().hash(hourly) ^
-      const ListEquality().hash(daily);
+  int get hashCode {
+    return runtimeType.hashCode ^
+        latitude.hashCode ^
+        longitude.hashCode ^
+        timezone.hashCode ^
+        current.hashCode ^
+        const ListEquality().hash(hourly) ^
+        const ListEquality().hash(daily);
+  }
+
+  @override
+  String toString() {
+    return '''WeatherForecast(
+    latitude: $latitude, 
+    longitude: $longitude, 
+    timezone: $timezone, 
+    current: $current, 
+    hourly: $hourly, 
+    daily: $daily,
+    )''';
+  }
 }
 
 /// Contains the field names of the OpenWeather API response for the full weather forecast.

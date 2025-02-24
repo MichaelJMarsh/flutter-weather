@@ -30,13 +30,17 @@ class DailyForecast {
   /// Creates an instance from JSON data.
   factory DailyForecast.fromJson(Map<String, dynamic> json) {
     final int timestamp = json[DailyForecastField.timestamp] as int? ?? 0;
-    final weather =
-        (json[DailyForecastField.weather] as List<dynamic>?)?.firstOrNull
-            as Map<String, dynamic>?;
 
-    // Extract temperature correctly from `main`
-    final mainData =
-        json[DailyForecastField.main] as Map<String, dynamic>? ?? {};
+    final tempData =
+        json[DailyForecastField.temp] as Map<String, dynamic>? ?? {};
+
+    // Ensure `weather` list exists and is not empty.
+    final weatherList =
+        json[DailyForecastField.weather] as List<dynamic>? ?? [];
+    final weatherMap =
+        (weatherList.isNotEmpty)
+            ? weatherList.first as Map<String, dynamic>?
+            : null;
 
     return DailyForecast(
       timestamp: timestamp,
@@ -44,12 +48,33 @@ class DailyForecast {
         timestamp * 1000,
         isUtc: true,
       ),
-      minTemperature:
-          (mainData[DailyForecastField.min] as num?)?.toDouble() ?? 0.0,
-      maxTemperature:
-          (mainData[DailyForecastField.max] as num?)?.toDouble() ?? 0.0,
-      iconCode: weather?[DailyForecastField.icon] ?? '01d',
+      minTemperature: (tempData['min'] as num?)?.toDouble() ?? 0.0,
+      maxTemperature: (tempData['max'] as num?)?.toDouble() ?? 0.0,
+      iconCode: weatherMap?[DailyForecastField.icon] ?? '01d',
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is DailyForecast &&
+        other.runtimeType == runtimeType &&
+        other.timestamp == timestamp &&
+        other.dateTime == dateTime &&
+        other.minTemperature == minTemperature &&
+        other.maxTemperature == maxTemperature &&
+        other.iconCode == iconCode;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^
+        timestamp.hashCode ^
+        dateTime.hashCode ^
+        minTemperature.hashCode ^
+        maxTemperature.hashCode ^
+        iconCode.hashCode;
   }
 
   @override
@@ -77,6 +102,9 @@ abstract class DailyForecastField {
 
   /// Main weather data block.
   static const main = 'main';
+
+  /// Temperature key in the API response.
+  static const temp = 'temp';
 
   /// Minimum temperature.
   static const min = 'temp_min';

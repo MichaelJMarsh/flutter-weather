@@ -48,6 +48,26 @@ class HourlyForecast {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is HourlyForecast &&
+        other.runtimeType == runtimeType &&
+        other.timestamp == timestamp &&
+        other.dateTime == dateTime &&
+        other.temperature == temperature &&
+        other.iconCode == iconCode;
+  }
+
+  @override
+  int get hashCode {
+    return runtimeType.hashCode ^
+        timestamp.hashCode ^
+        dateTime.hashCode ^
+        temperature.hashCode;
+  }
+
+  @override
   String toString() {
     return '''HourlyForecast(
     timestamp: $timestamp, 

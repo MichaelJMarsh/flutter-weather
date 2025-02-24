@@ -5,7 +5,7 @@ void main() {
   group('HourlyForecast', () {
     final testJson = {
       'dt': 1638303600,
-      'temp': 19.0,
+      'main': {'temp': 19.0},
       'weather': [
         {'icon': '01d'},
       ],
@@ -14,7 +14,7 @@ void main() {
     final forecast = HourlyForecast.fromJson(testJson);
 
     test('parses timestamp and dateTime correctly', () {
-      expect(forecast.timestamp, 1638303600);
+      expect(forecast.timestamp, equals(1638303600));
       final expectedDateTime = DateTime.fromMillisecondsSinceEpoch(
         1638303600 * 1000,
         isUtc: true,
@@ -23,8 +23,8 @@ void main() {
     });
 
     test('parses temperature and iconCode correctly', () {
-      expect(forecast.temperature, 19.0);
-      expect(forecast.iconCode, '01d');
+      expect(forecast.temperature, equals(19.0));
+      expect(forecast.iconCode, equals('01d'));
     });
 
     test('equality and hashCode work correctly', () {
@@ -34,7 +34,7 @@ void main() {
     });
 
     test('toString returns a non-empty string', () {
-      expect(forecast.toString().isNotEmpty, true);
+      expect(forecast.toString().isNotEmpty, isTrue);
     });
   });
 }

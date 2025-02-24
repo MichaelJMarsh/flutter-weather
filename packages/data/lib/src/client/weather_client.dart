@@ -36,9 +36,7 @@ class WeatherClient implements WeatherService {
     final response = await _client.get(uri);
 
     if (response.statusCode == _HttpStatusCode.unauthorized.code) {
-      throw Exception(
-        'Invalid API Key. Get a free one at https://openweathermap.org/api.',
-      );
+      throw InvalidApiKeyException();
     }
 
     if (response.statusCode != _HttpStatusCode.successful.code) {
