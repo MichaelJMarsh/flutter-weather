@@ -27,4 +27,3 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   mockito: ^5.4.5
-  sqflite_common_ffi: ^2.3.5

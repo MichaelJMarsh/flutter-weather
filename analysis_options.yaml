@@ -1,1 +1,8 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    prefer_const_constructors: error
+    prefer_const_declarations: error
+    prefer_const_literals_to_create_immutables: error
+    unnecessary_const: error
