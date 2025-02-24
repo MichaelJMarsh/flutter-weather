@@ -40,18 +40,34 @@ class WeekdayWeatherCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                dayLabel,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+              SizedBox(
+                width: 48,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    dayLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ),
               Expanded(
                 flex: 2,
-                child: WeatherIcon(iconCode: forecast.iconCode, size: 40),
+                child: Center(
+                  child: WeatherIcon(iconCode: forecast.iconCode, size: 40),
+                ),
               ),
-              Text(
-                '$minTempString°',
-                style: TextStyle(
-                  color: colorScheme.onSurface.withValues(alpha: 0.48),
+              SizedBox(
+                width: 32,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '$minTempString°',
+                      style: TextStyle(
+                        color: colorScheme.onSurface.withValues(alpha: 0.48),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -63,7 +79,15 @@ class WeekdayWeatherCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('$maxTempString°'),
+              SizedBox(
+                width: 32,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('$maxTempString°'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -170,6 +194,7 @@ class _TemperatureProgressBarState extends State<_TemperatureProgressBar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     const barHeight = 4.0;
     const borderRadius = BorderRadius.all(Radius.circular(8));
 
@@ -178,35 +203,35 @@ class _TemperatureProgressBarState extends State<_TemperatureProgressBar> {
         final width = constraints.maxWidth;
         final animatedWidth = width * _progress;
 
-        return Stack(
-          children: [
-            SizedBox(
-              height: barHeight,
-              width: width,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withValues(alpha: 0.08),
-                  borderRadius: borderRadius,
-                ),
-              ),
-            ),
-            ClipRRect(
+        return SizedBox(
+          height: barHeight,
+          width: width,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colorScheme.onSurface.withValues(alpha: 0.08),
               borderRadius: borderRadius,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-                height: barHeight,
-                width: animatedWidth,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [_startColor, _endColor],
+            ),
+
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ClipRRect(
+                borderRadius: borderRadius,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  height: barHeight,
+                  width: animatedWidth,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [_startColor, _endColor],
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
+          ),
         );
       },
     );

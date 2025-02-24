@@ -56,6 +56,20 @@ class _Layout extends StatelessWidget {
           child: Divider(color: colorScheme.primary.withValues(alpha: 0.48)),
         ),
         SliverPadding(
+          padding: const EdgeInsets.only(top: 8, left: 32, right: 32),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              '7-DAY FORECAST',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                height: 24 / 14,
+                color: colorScheme.onSurface.withValues(alpha: 0.64),
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
           padding: EdgeInsets.only(
             top: 16,
             left: 24,
@@ -133,6 +147,16 @@ class _CurrentWeatherSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final dashboardScope = context.watch<DashboardPageScope>();
+
+    // Get today's forecast from dailyForecast
+    final todayForecast =
+        dashboardScope.dailyForecast.isNotEmpty
+            ? dashboardScope.dailyForecast.first
+            : null;
+
+    final minTemp = todayForecast?.minTemperature.round() ?? '--';
+    final maxTemp = todayForecast?.maxTemperature.round() ?? '--';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -150,11 +174,32 @@ class _CurrentWeatherSection extends StatelessWidget {
           current?.description.toUpperCase() ?? '',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface.withValues(alpha: 0.24),
+            color: colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
         const SizedBox(height: 8),
-        WeatherIcon(iconCode: current?.iconCode, size: 80),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'L: $minTemp°',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface.withValues(alpha: 0.64),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'H: $maxTemp°',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface.withValues(alpha: 0.64),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

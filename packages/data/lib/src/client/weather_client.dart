@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:domain/domain.dart';
@@ -47,7 +48,9 @@ class WeatherClient implements WeatherService {
     }
 
     final jsonBody = json.decode(response.body) as Map<String, dynamic>;
-    return CurrentWeather.fromJson(jsonBody);
+    final currentWeather = CurrentWeather.fromJson(jsonBody);
+
+    return currentWeather.copyWith(dateTime: currentWeather.dateTime.toLocal());
   }
 
   @override
@@ -85,60 +88,82 @@ class WeatherClient implements WeatherService {
   Future<List<DailyForecast>> getDailyForecast({
     required Coordinates coordinates,
   }) async {
-    if (_apiKey == null || _apiKey.isEmpty) throw MissingApiKeyException();
+    if (_apiKey == null || _apiKey!.isEmpty) throw MissingApiKeyException();
 
     final uri = _getCoordinatesURI(
       path: '$_baseUrl/forecast',
       coordinates: coordinates,
     );
-
     final response = await _client.get(uri);
 
-    if (response.statusCode == _HttpStatusCode.unauthorized.code) {
+    if (response.statusCode == 401) {
       throw InvalidApiKeyException();
     }
-
-    if (response.statusCode != _HttpStatusCode.successful.code) {
+    if (response.statusCode != 200) {
       throw Exception(
-        'Failed to load daily forecast. Status code: ${response.statusCode}\nResponse: ${response.body}',
+        'Failed to load daily forecast. '
+        'Status code: ${response.statusCode}\nResponse: ${response.body}',
       );
     }
 
     final jsonBody = json.decode(response.body) as Map<String, dynamic>;
     final List<dynamic> forecastList = jsonBody['list'] ?? [];
 
-    // Extract daily summaries from 3-hour forecast data.
+    // We'll group 3-hour forecasts by their *local* day.
     final groupedByDay = <int, List<HourlyForecast>>{};
+
+    // Convert "today" to local time.
+    final nowUtc = clock.now(); // This is UTC or system time
+    final nowLocal = nowUtc.toLocal();
+    final localToday = DateTime(nowLocal.year, nowLocal.month, nowLocal.day);
+    final localTomorrow = localToday.add(const Duration(days: 1));
 
     for (final data in forecastList) {
       final hourlyData = HourlyForecast.fromJson(data as Map<String, dynamic>);
-      final dayKey =
-          DateTime(
-            hourlyData.dateTime.year,
-            hourlyData.dateTime.month,
-            hourlyData.dateTime.day,
-          ).millisecondsSinceEpoch;
 
+      // Convert forecast time to local.
+      final localDateTime = hourlyData.dateTime.toLocal();
+      // Group by "year/month/day" in local time.
+      final forecastDate = DateTime(
+        localDateTime.year,
+        localDateTime.month,
+        localDateTime.day,
+      );
+
+      // Skip today if you want to start from tomorrow:
+      if (forecastDate.isBefore(localTomorrow)) {
+        continue;
+      }
+
+      // Group by the day (in local time).
+      final dayKey = forecastDate.millisecondsSinceEpoch;
       groupedByDay.putIfAbsent(dayKey, () => []).add(hourlyData);
     }
 
-    return groupedByDay.values.map((forecasts) {
-      final firstEntry = forecasts.first;
-      final hourlyTempertures = forecasts.map(
-        (hourlyForecast) => hourlyForecast.temperature,
-      );
+    // Build DailyForecast objects for each local day
+    final dailyForecasts =
+        groupedByDay.values.map((forecasts) {
+          // Sort each day's 3-hour block by time, just in case
+          forecasts.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+          final firstEntry = forecasts.first;
 
-      final minTemp = hourlyTempertures.reduce((a, b) => a < b ? a : b);
-      final maxTemp = hourlyTempertures.reduce((a, b) => a > b ? a : b);
+          final hourlyTemperatures = forecasts.map((f) => f.temperature);
+          final minTemp = hourlyTemperatures.reduce((a, b) => a < b ? a : b);
+          final maxTemp = hourlyTemperatures.reduce((a, b) => a > b ? a : b);
 
-      return DailyForecast(
-        timestamp: firstEntry.timestamp,
-        dateTime: firstEntry.dateTime,
-        minTemperature: minTemp,
-        maxTemperature: maxTemp,
-        iconCode: firstEntry.iconCode ?? '01d',
-      );
-    }).toList();
+          return DailyForecast(
+            timestamp: firstEntry.timestamp,
+            // We want the local date/time for display
+            dateTime: firstEntry.dateTime.toLocal(),
+            minTemperature: minTemp,
+            maxTemperature: maxTemp,
+            iconCode: firstEntry.iconCode ?? '01d',
+          );
+        }).toList();
+
+    // Sort final daily list by date, then take 7
+    dailyForecasts.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    return dailyForecasts.take(7).toList();
   }
 
   /// Returns the Uri for the [path] with the given [coordinates].

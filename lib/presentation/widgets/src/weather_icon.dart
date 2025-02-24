@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/widgets.dart';
 
 /// A widget that displays a weather icon.
 class WeatherIcon extends StatelessWidget {
@@ -13,21 +11,32 @@ class WeatherIcon extends StatelessWidget {
   /// The size of the weather icon.
   final double size;
 
+  /// A map of OpenWeather icon codes to corresponding weather emojis.
+  static const _weatherEmojis = <String, String>{
+    '01d': '☀️', // Clear sky (day)
+    '01n': '🌙', // Clear sky (night)
+    '02d': '🌤️', // Few clouds (day)
+    '02n': '🌙☁️', // Few clouds (night)
+    '03d': '☁️', // Scattered clouds
+    '03n': '☁️', // Scattered clouds
+    '04d': '☁️', // Broken clouds
+    '04n': '☁️', // Broken clouds
+    '09d': '🌧️', // Shower rain
+    '09n': '🌧️', // Shower rain
+    '10d': '🌦️', // Rain (day)
+    '10n': '🌧️', // Rain (night)
+    '11d': '⛈️', // Thunderstorm
+    '11n': '⛈️', // Thunderstorm
+    '13d': '❄️', // Snow
+    '13n': '❄️', // Snow
+    '50d': '🌫️', // Mist
+    '50n': '🌫️', // Mist
+  };
+
   @override
   Widget build(BuildContext context) {
-    final imageUrl = 'https://openweathermap.org/img/wn/$iconCode@2x.png';
+    final emoji = _weatherEmojis[iconCode] ?? '❓';
 
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      width: size,
-      height: size,
-      placeholder: (_, __) {
-        return SizedBox.square(
-          dimension: size,
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-        );
-      },
-      errorWidget: (_, __, ___) => Icon(Icons.cloud, size: size),
-    );
+    return Text(emoji, style: TextStyle(fontSize: size));
   }
 }

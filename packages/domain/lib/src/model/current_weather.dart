@@ -63,19 +63,6 @@ class CurrentWeather {
   }
 
   @override
-  String toString() {
-    return '''CurrentWeather(
-    timestamp: $timestamp, 
-    dateTime: $dateTime, 
-    temperature: $temperature, 
-    feelsLikeTemperature: $feelsLikeTemperature, 
-    description: $description, 
-    icon: $iconCode, 
-    humidity: $humidity
-    )''';
-  }
-
-  @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
@@ -100,6 +87,40 @@ class CurrentWeather {
       description.hashCode ^
       iconCode.hashCode ^
       humidity.hashCode;
+
+  /// Creates a copy of this instance with the given fields replaced by the new values.
+  CurrentWeather copyWith({
+    int? timestamp,
+    DateTime? dateTime,
+    double? temperature,
+    double? feelsLikeTemperature,
+    String? description,
+    String? iconCode,
+    double? humidity,
+  }) {
+    return CurrentWeather(
+      timestamp: timestamp ?? this.timestamp,
+      dateTime: dateTime ?? this.dateTime,
+      temperature: temperature ?? this.temperature,
+      feelsLikeTemperature: feelsLikeTemperature ?? this.feelsLikeTemperature,
+      description: description ?? this.description,
+      iconCode: iconCode ?? this.iconCode,
+      humidity: humidity ?? this.humidity,
+    );
+  }
+
+  @override
+  String toString() {
+    return '''CurrentWeather(
+    timestamp: $timestamp, 
+    dateTime: $dateTime, 
+    temperature: $temperature, 
+    feelsLikeTemperature: $feelsLikeTemperature, 
+    description: $description, 
+    icon: $iconCode, 
+    humidity: $humidity
+    )''';
+  }
 }
 
 /// Contains the field names of the OpenWeather API response for current weather.
