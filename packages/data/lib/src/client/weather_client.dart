@@ -88,7 +88,7 @@ class WeatherClient implements WeatherService {
   Future<List<DailyForecast>> getDailyForecast({
     required Coordinates coordinates,
   }) async {
-    if (_apiKey == null || _apiKey!.isEmpty) throw MissingApiKeyException();
+    if (_apiKey == null || _apiKey.isEmpty) throw MissingApiKeyException();
 
     final uri = _getCoordinatesURI(
       path: '$_baseUrl/forecast',
