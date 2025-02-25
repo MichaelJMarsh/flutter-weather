@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeMode;
 import 'package:flutter/services.dart';
 
 import 'package:domain/domain.dart';
@@ -16,7 +16,6 @@ class FlutterWeatherApp extends StatelessWidget {
     super.key,
     required this.share,
     required this.urlLauncher,
-    required this.authenticationService,
     required this.remoteSettingsService,
     required this.weatherService,
   });
@@ -24,7 +23,6 @@ class FlutterWeatherApp extends StatelessWidget {
   final Share share;
   final UrlLauncher urlLauncher;
 
-  final AuthenticationService authenticationService;
   final RemoteSettingsService remoteSettingsService;
   final WeatherService weatherService;
 
@@ -34,14 +32,18 @@ class FlutterWeatherApp extends StatelessWidget {
       providers: [
         Provider.value(value: share),
         Provider.value(value: urlLauncher),
-        Provider.value(value: authenticationService),
         Provider.value(value: remoteSettingsService),
         Provider.value(value: weatherService),
       ],
       builder: (context, __) {
         final mediaQuery = MediaQuery.of(context);
+
+        final themeMode = context.select(
+          (RemoteSettingsService service) => service.userSettings.themeMode,
+        );
         final theme = AppTheme.getTheme(
-          platformBrightness: mediaQuery.platformBrightness,
+          mode: themeMode,
+          brightness: mediaQuery.platformBrightness,
         );
 
         return MediaQuery(

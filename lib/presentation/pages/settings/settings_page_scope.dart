@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide ThemeMode;
 
 import 'package:domain/domain.dart';
@@ -7,25 +9,18 @@ import 'package:provider/provider.dart';
 /// of the app settings on the [SettingsPage].
 class SettingsPageScope extends ChangeNotifier {
   /// Creates a new [SettingsPageScope].
-  SettingsPageScope({
-    required AuthenticationService authenticationService,
-    required RemoteSettingsService remoteSettingsService,
-  }) : _authenticationService = authenticationService,
-       _remoteSettingsService = remoteSettingsService;
+  SettingsPageScope({required RemoteSettingsService remoteSettingsService})
+    : _remoteSettingsService = remoteSettingsService;
 
-  final AuthenticationService _authenticationService;
   final RemoteSettingsService _remoteSettingsService;
 
   /// Creates a new [SettingsPageScope] from the [context].
   factory SettingsPageScope.of(final BuildContext context) {
-    return SettingsPageScope(
-      authenticationService: context.read(),
-      remoteSettingsService: context.read(),
-    );
+    return SettingsPageScope(remoteSettingsService: context.read());
   }
 
-  /// The user ID for the current user.
-  String get _userId => _authenticationService.userId;
+  /// The subscription to the user settings.
+  StreamSubscription<UserSettings>? _settingsSubscription;
 
   /// Whether the [SettingsPageScope] is currently loading.
   bool get isLoading => _isLoading;
@@ -45,10 +40,26 @@ class SettingsPageScope extends ChangeNotifier {
 
   /// Initializes the settings by fetching the current settings from Firebase.
   Future<void> initialize() async {
-    final settings = await _remoteSettingsService.fetchSettings(_userId);
+    final settings = await _remoteSettingsService.get();
     _themeMode = settings.themeMode;
     _timeFormat = settings.timeFormat;
     _temperatureUnit = settings.temperatureUnit;
+
+    _settingsSubscription = _remoteSettingsService.onUserSettingsChanged.listen(
+      (settings) {
+        if (_themeMode != settings.themeMode) {
+          _themeMode = settings.themeMode;
+        }
+        if (_timeFormat != settings.timeFormat) {
+          _timeFormat = settings.timeFormat;
+        }
+        if (_temperatureUnit != settings.temperatureUnit) {
+          _temperatureUnit = settings.temperatureUnit;
+        }
+
+        notifyListeners();
+      },
+    );
 
     _isLoading = false;
     notifyListeners();
@@ -60,16 +71,18 @@ class SettingsPageScope extends ChangeNotifier {
 
     _temperatureUnit = value;
 
-    await _remoteSettingsService.saveSettings(
-      _userId,
-      UserSettings(
-        themeMode: _themeMode,
-        timeFormat: _timeFormat,
-        temperatureUnit: _temperatureUnit,
-      ),
+    await _remoteSettingsService.update(
+      (settings) => settings.copyWith(temperatureUnit: _temperatureUnit),
     );
 
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _settingsSubscription?.cancel();
+
+    super.dispose();
   }
 
   /// Sets the time format for the app.
@@ -78,13 +91,8 @@ class SettingsPageScope extends ChangeNotifier {
 
     _timeFormat = value;
 
-    await _remoteSettingsService.saveSettings(
-      _userId,
-      UserSettings(
-        themeMode: _themeMode,
-        timeFormat: _timeFormat,
-        temperatureUnit: _temperatureUnit,
-      ),
+    await _remoteSettingsService.update(
+      (settings) => settings.copyWith(timeFormat: _timeFormat),
     );
 
     notifyListeners();
@@ -97,13 +105,8 @@ class SettingsPageScope extends ChangeNotifier {
 
     _themeMode = enabled ? ThemeMode.dark : ThemeMode.light;
 
-    await _remoteSettingsService.saveSettings(
-      _userId,
-      UserSettings(
-        themeMode: _themeMode,
-        timeFormat: _timeFormat,
-        temperatureUnit: _temperatureUnit,
-      ),
+    await _remoteSettingsService.update(
+      (settings) => settings.copyWith(themeMode: _themeMode),
     );
 
     notifyListeners();

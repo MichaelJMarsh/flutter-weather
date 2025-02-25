@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeMode;
+
+import 'package:domain/domain.dart';
 
 /// Defines the Flutter Weather app themes.
 class AppTheme {
@@ -27,7 +29,15 @@ class AppTheme {
   );
 
   /// Determines the correct theme based on user settings and system brightness.
-  static ThemeData getTheme({required Brightness platformBrightness}) {
-    return platformBrightness == Brightness.light ? lightTheme : darkTheme;
+  static ThemeData getTheme({
+    required ThemeMode mode,
+    required Brightness brightness,
+  }) {
+    return switch (mode) {
+      ThemeMode.light => lightTheme,
+      ThemeMode.dark => darkTheme,
+      ThemeMode.system =>
+        brightness == Brightness.dark ? darkTheme : lightTheme,
+    };
   }
 }

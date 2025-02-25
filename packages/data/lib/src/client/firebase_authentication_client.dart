@@ -4,9 +4,9 @@ import 'package:domain/domain.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// The implementation of [AuthenticationService] using Firebase Authentication.
-class FirebaseAuthenticationPlugin implements AuthenticationService {
-  /// Creates a new [FirebaseAuthenticationPlugin].
-  FirebaseAuthenticationPlugin({FirebaseAuth? firebaseAuth})
+class FirebaseAuthenticationClient implements AuthenticationService {
+  /// Creates a new [FirebaseAuthenticationClient].
+  FirebaseAuthenticationClient({FirebaseAuth? firebaseAuth})
     : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final FirebaseAuth _firebaseAuth;

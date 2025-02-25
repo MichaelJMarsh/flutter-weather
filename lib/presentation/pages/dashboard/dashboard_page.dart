@@ -272,9 +272,6 @@ class _CurrentWeatherSection extends StatelessWidget {
             ? dashboardScope.dailyForecast.first
             : null;
 
-    final minTemp = todayForecast?.minTemperature.round() ?? '--';
-    final maxTemp = todayForecast?.maxTemperature.round() ?? '--';
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -282,7 +279,7 @@ class _CurrentWeatherSection extends StatelessWidget {
           animation: entranceAnimations.currentTemperature,
           pixels: 40,
           child: Text(
-            '${current?.temperature.toStringAsFixed(1) ?? 0}°',
+            dashboardScope.formatTemperature(current?.temperature),
             style: TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.w200,
@@ -310,7 +307,7 @@ class _CurrentWeatherSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'L: $minTemp°',
+                'L: ${dashboardScope.formatTemperature(todayForecast?.minTemperature)}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -319,7 +316,7 @@ class _CurrentWeatherSection extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'H: $maxTemp°',
+                'H: ${dashboardScope.formatTemperature(todayForecast?.maxTemperature)}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

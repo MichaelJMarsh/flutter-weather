@@ -29,7 +29,7 @@ class Bootstrap {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    final authenticationService = FirebaseAuthenticationPlugin(
+    final authenticationService = FirebaseAuthenticationClient(
       firebaseAuth: FirebaseAuth.instance,
     );
     await authenticationService.authenticate();
@@ -39,10 +39,10 @@ class Bootstrap {
     return FlutterWeatherApp(
       share: SharePlugin(delegate: ShareDelegate()),
       urlLauncher: UrlLauncherPlugin(delegate: UrlLauncherDelegate()),
-      authenticationService: authenticationService,
-      remoteSettingsService: FirestoreSettingsPlugin(
+      remoteSettingsService: FirestoreSettingsClient(
         firestore: FirebaseFirestore.instance,
-      )..fetchSettings(authenticationService.userId),
+        userId: authenticationService.userId,
+      )..initialize(),
       weatherService: WeatherClient(apiKey: dotenv.env['WEATHER_API_KEY']),
     );
   }

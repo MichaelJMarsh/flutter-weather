@@ -6,9 +6,9 @@ import 'time_format.dart';
 class UserSettings {
   /// Creates a new [UserSettings].
   const UserSettings({
-    required this.themeMode,
-    required this.timeFormat,
-    required this.temperatureUnit,
+    this.themeMode = ThemeMode.system,
+    this.timeFormat = TimeFormat.twentyFourHour,
+    this.temperatureUnit = TemperatureUnit.celsius,
   });
 
   /// The selected theme mode for the app.
@@ -37,5 +37,28 @@ class UserSettings {
         themeMode.hashCode ^
         timeFormat.hashCode ^
         temperatureUnit.hashCode;
+  }
+
+  @override
+  String toString() {
+    return '''UserSettings{
+    themeMode: $themeMode, 
+    timeFormat: $timeFormat, 
+    temperatureUnit: $temperatureUnit
+    }''';
+  }
+
+  /// Creates a copy of this [UserSettings] but with the given fields replaced
+  /// with the new values.
+  UserSettings copyWith({
+    ThemeMode? themeMode,
+    TimeFormat? timeFormat,
+    TemperatureUnit? temperatureUnit,
+  }) {
+    return UserSettings(
+      themeMode: themeMode ?? this.themeMode,
+      timeFormat: timeFormat ?? this.timeFormat,
+      temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+    );
   }
 }

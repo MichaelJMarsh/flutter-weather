@@ -1,20 +1,28 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:domain/domain.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 /// The provider-scoped state management class which handles the fetching
 /// of the weather data for the [DashboardPage].
 class DashboardPageScope extends ChangeNotifier {
   /// Creates a new [DashboardPageScope].
-  DashboardPageScope({required WeatherService weatherService})
-    : _weatherService = weatherService;
+  DashboardPageScope({
+    required RemoteSettingsService remoteSettingsService,
+    required WeatherService weatherService,
+  }) : _remoteSettingsService = remoteSettingsService,
+       _weatherService = weatherService;
 
   /// Creates a new [DashboardPageScope] from the [context].
   factory DashboardPageScope.of(final BuildContext context) {
-    return DashboardPageScope(weatherService: context.read());
+    return DashboardPageScope(
+      remoteSettingsService: context.read(),
+      weatherService: context.read(),
+    );
   }
 
+  final RemoteSettingsService _remoteSettingsService;
   final WeatherService _weatherService;
 
   /// Whether the [DashboardPageScope] is currently loading.
@@ -51,6 +59,31 @@ class DashboardPageScope extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Formats the given [temperature] into a string.
+  String formatTemperature(double? temperature) {
+    if (temperature == null) return 'N/A';
+
+    final temperatureUnit = _remoteSettingsService.userSettings.temperatureUnit;
+
+    if (temperatureUnit == TemperatureUnit.celsius) {
+      return '${temperature.round()}°C';
+    }
+
+    // Convert to Fahrenheit.
+    return '${(temperature * 1.8 + 32).round()}°F';
+  }
+
+  /// Formats the given [time] into a string.
+  String formatTime(DateTime time) {
+    final timeFormat = _remoteSettingsService.userSettings.timeFormat;
+
+    if (timeFormat == TimeFormat.twentyFourHour) {
+      return DateFormat.H().format(time);
+    }
+
+    return DateFormat.j().format(time);
   }
 
   /// Loads the current weather.
