@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:domain/domain.dart';
+import 'package:flutter_weather/presentation/pages/settings/settings_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +14,8 @@ import 'package:flutter_weather/presentation/widgets/widgets.dart';
 import 'dashboard_page_scope.dart';
 import 'widgets/weekday_weather_card.dart';
 
-/// A dashboard page displaying the current weather, a horizontal hourly forecast,
-/// and a vertical list for daily forecasts.
+/// A page displaying the current weather, a horizontal hourly forecast, and
+/// a vertical list for daily forecasts.
 class DashboardPage extends StatefulWidget {
   /// Creates a new [DashboardPage].
   const DashboardPage({super.key});
@@ -61,6 +62,13 @@ class _DashboardPageState extends State<DashboardPage>
     _entranceAnimationsController.dispose();
 
     super.dispose();
+  }
+
+  /// Navigates to the settings page.
+  Future<void> _openSettingsPage() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
   }
 
   @override
@@ -203,7 +211,7 @@ class _DashboardPageState extends State<DashboardPage>
                 pixels: 32,
                 child: IconButton(
                   icon: const Icon(Icons.settings),
-                  onPressed: () {},
+                  onPressed: _openSettingsPage,
                 ),
               ),
             ],

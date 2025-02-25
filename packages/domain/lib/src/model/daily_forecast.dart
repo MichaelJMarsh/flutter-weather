@@ -48,8 +48,10 @@ class DailyForecast {
         timestamp * 1000,
         isUtc: true,
       ),
-      minTemperature: (tempData['min'] as num?)?.toDouble() ?? 0.0,
-      maxTemperature: (tempData['max'] as num?)?.toDouble() ?? 0.0,
+      minTemperature:
+          (tempData[DailyForecastField.min] as num?)?.toDouble() ?? 0.0,
+      maxTemperature:
+          (tempData[DailyForecastField.max] as num?)?.toDouble() ?? 0.0,
       iconCode: weatherMap?[DailyForecastField.icon] ?? '01d',
     );
   }
@@ -107,10 +109,10 @@ abstract class DailyForecastField {
   static const temp = 'temp';
 
   /// Minimum temperature.
-  static const min = 'temp_min';
+  static const min = 'min';
 
   /// Maximum temperature.
-  static const max = 'temp_max';
+  static const max = 'max';
 
   /// Icon representation of the weather condition.
   static const icon = 'icon';
