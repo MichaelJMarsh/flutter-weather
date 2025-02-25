@@ -16,12 +16,16 @@ class FlutterWeatherApp extends StatelessWidget {
     super.key,
     required this.share,
     required this.urlLauncher,
+    required this.authenticationService,
+    required this.remoteSettingsService,
     required this.weatherService,
   });
 
   final Share share;
   final UrlLauncher urlLauncher;
 
+  final AuthenticationService authenticationService;
+  final RemoteSettingsService remoteSettingsService;
   final WeatherService weatherService;
 
   @override
@@ -30,6 +34,8 @@ class FlutterWeatherApp extends StatelessWidget {
       providers: [
         Provider.value(value: share),
         Provider.value(value: urlLauncher),
+        Provider.value(value: authenticationService),
+        Provider.value(value: remoteSettingsService),
         Provider.value(value: weatherService),
       ],
       builder: (context, __) {

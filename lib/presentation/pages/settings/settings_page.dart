@@ -1,11 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeMode;
+
+import 'package:domain/domain.dart';
+import 'package:provider/provider.dart';
 
 import 'package:flutter_weather/presentation/animations/entrance_animations.dart';
-import 'package:flutter_weather/presentation/pages/settings/settings_page_scope.dart';
 import 'package:flutter_weather/presentation/widgets/widgets.dart';
-import 'package:provider/provider.dart';
+
+import 'settings_page_scope.dart';
 
 /// A page displaying the list of available settings.
 class SettingsPage extends StatefulWidget {
@@ -57,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => SettingsPageScope.of(context),
+      create: (context) => SettingsPageScope.of(context)..initialize(),
       builder: (context, _) {
         final colorScheme = Theme.of(context).colorScheme;
 
@@ -69,121 +72,151 @@ class _SettingsPageState extends State<SettingsPage>
             title: AnimatedTranslation.vertical(
               animation: _entranceAnimations.appBarTitle,
               pixels: 40,
-              child: Text('Settings'),
+              child: const Text('Settings'),
             ),
             leading: AnimatedTranslation.horizontal(
               animation: _entranceAnimations.appBarButton,
               pixels: -32,
               child: IconButton(
                 onPressed: Navigator.of(context).pop,
-                icon: Icon(Icons.arrow_back_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
               ),
             ),
           ),
-          body: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    AnimatedTranslation.vertical(
-                      animation: _entranceAnimations.themeCard,
-                      pixels: 40,
-                      child: Card(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(24)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Dark Mode',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
+          body: AnimatedSwitcher(
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            duration: const Duration(milliseconds: 350),
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              );
+            },
+            child:
+                settings.isLoading
+                    ? const Padding(
+                      padding: EdgeInsets.only(bottom: kToolbarHeight),
+                      child: LoadingLayout(
+                        message: Text('Loading settings data...'),
+                      ),
+                    )
+                    : CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.themeCard,
+                                pixels: 40,
+                                child: Card(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(24),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Dark Mode',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.onSurface,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Switch(
+                                          value:
+                                              settings.themeMode ==
+                                              ThemeMode.dark,
+                                          onChanged: settings.toggleThemeMode,
+                                          activeColor: colorScheme.primary,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Switch(
-                                value: settings.themeMode == ThemeMode.dark,
-                                onChanged: settings.toggleThemeMode,
-                                activeColor: colorScheme.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AnimatedTranslation.vertical(
-                      animation: _entranceAnimations.unitsCard,
-                      pixels: 40,
-                      child: Card(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(24)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            children: [
-                              const Text('Time Format'),
-                              ChipPicker<TimeFormat>(
-                                options: TimeFormat.values,
-                                initialOption: settings.timeFormat,
-                                labelBuilder: (option) => option.displayText,
-                                onOptionSelected:
-                                    (value) => settings.timeFormat = value,
-                              ),
-                              Divider(
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.16,
+                              const SizedBox(height: 8),
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.unitsCard,
+                                pixels: 40,
+                                child: Card(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(24),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text('Time Format'),
+                                        ChipPicker<TimeFormat>(
+                                          options: TimeFormat.values,
+                                          initialOption: settings.timeFormat,
+                                          labelBuilder:
+                                              (option) => option.displayText,
+                                          onOptionSelected:
+                                              settings.setTimeFormat,
+                                        ),
+                                        Divider(
+                                          color: colorScheme.onSurface
+                                              .withValues(alpha: 0.16),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        const Text('Temperature Unit'),
+                                        ChipPicker<TemperatureUnit>(
+                                          options: TemperatureUnit.values,
+                                          initialOption:
+                                              settings.temperatureUnit,
+                                          labelBuilder:
+                                              (option) => option.displayText,
+                                          onOptionSelected:
+                                              settings.setTemperatureUnit,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Text('Temperature Unit'),
-                              ChipPicker<TemperatureUnit>(
-                                options: TemperatureUnit.values,
-                                initialOption: settings.temperatureUnit,
-                                labelBuilder: (option) => option.displayText,
-                                onOptionSelected:
-                                    (value) => settings.temperatureUnit = value,
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.appVersion,
+                                pixels: 40,
+                                child: Center(
+                                  child: Text(
+                                    'Version 1.0.0',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurface.withValues(
+                                        alpha: 0.48,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ],
+                            ]),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    AnimatedTranslation.vertical(
-                      animation: _entranceAnimations.appVersion,
-                      pixels: 40,
-                      child: Center(
-                        child: Text(
-                          'Version 1.0.0',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface.withValues(
-                              alpha: 0.48,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
           ),
         );
       },

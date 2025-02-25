@@ -1,7 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data/data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -27,11 +29,20 @@ class Bootstrap {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+    final authenticationService = FirebaseAuthenticationPlugin(
+      firebaseAuth: FirebaseAuth.instance,
+    );
+    await authenticationService.authenticate();
+
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     return FlutterWeatherApp(
       share: SharePlugin(delegate: ShareDelegate()),
       urlLauncher: UrlLauncherPlugin(delegate: UrlLauncherDelegate()),
+      authenticationService: authenticationService,
+      remoteSettingsService: FirestoreSettingsPlugin(
+        firestore: FirebaseFirestore.instance,
+      )..fetchSettings(authenticationService.userId),
       weatherService: WeatherClient(apiKey: dotenv.env['WEATHER_API_KEY']),
     );
   }

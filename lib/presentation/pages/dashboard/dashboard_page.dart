@@ -87,6 +87,7 @@ class _DashboardPageState extends State<DashboardPage>
         final dailyForecast = dashboardScope.dailyForecast;
 
         Widget body = CustomScrollView(
+          key: const Key('dashboard_layout'),
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverPadding(
@@ -157,21 +158,30 @@ class _DashboardPageState extends State<DashboardPage>
         final isLoading = dashboardScope.isLoading;
         if (isLoading) {
           body = AnimatedTranslation.vertical(
+            key: Key(
+              'dashboard_loading_layout.${isLoading ? 'visible' : 'hidden'}',
+            ),
             animation: _entranceAnimations.loadingIndicator,
             pixels: 40,
-            child: LoadingLayout(
-              key: Key(
-                'dashboard_loading_layout.${isLoading ? 'visible' : 'hidden'}',
-              ),
-              message: Text('Loading weather data...'),
+            child: const Padding(
+              padding: EdgeInsets.only(bottom: kToolbarHeight),
+              child: LoadingLayout(message: Text('Loading weather data...')),
             ),
           );
         }
 
-        if (currentWeather == null ||
-            hourlyForecast.isEmpty ||
-            dailyForecast.isEmpty) {
-          body = Center(child: Text('Failed to load weather data.'));
+        final displayFailedToLoadState =
+            currentWeather == null &&
+            hourlyForecast.isEmpty &&
+            dailyForecast.isEmpty;
+        if (displayFailedToLoadState) {
+          body = Padding(
+            key: Key(
+              'dashboard_error_layout.${displayFailedToLoadState ? 'visible' : 'hidden'}',
+            ),
+            padding: const EdgeInsets.only(bottom: kToolbarHeight),
+            child: const Center(child: Text('Failed to load weather data.')),
+          );
         }
 
         return Scaffold(
@@ -220,6 +230,15 @@ class _DashboardPageState extends State<DashboardPage>
             switchInCurve: Curves.easeIn,
             switchOutCurve: Curves.easeOut,
             duration: const Duration(milliseconds: 350),
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              );
+            },
             child: body,
           ),
         );
@@ -346,7 +365,10 @@ class _HourlyForecastSection extends StatelessWidget {
             children: [
               Text(
                 formattedHour,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 4),
               WeatherIcon(iconCode: hourData.iconCode, size: 36),
