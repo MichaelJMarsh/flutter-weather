@@ -25,6 +25,29 @@ jobs:
       - name: Flutter Doctor
         run: flutter doctor -v
 
+      # 3) Create .env file (Required for Firebase and Weather API)
+      - name: Create .env file (CI)
+        run: |
+          echo "FIREBASE_WEB_API_KEY=${{ secrets.FIREBASE_WEB_API_KEY }}" >> .env
+          echo "FIREBASE_WEB_APP_ID=${{ secrets.FIREBASE_WEB_APP_ID }}" >> .env
+          echo "FIREBASE_WEB_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_WEB_MESSAGING_SENDER_ID }}" >> .env
+          echo "FIREBASE_WEB_PROJECT_ID=${{ secrets.FIREBASE_WEB_PROJECT_ID }}" >> .env
+          echo "FIREBASE_WEB_AUTH_DOMAIN=${{ secrets.FIREBASE_WEB_AUTH_DOMAIN }}" >> .env
+          echo "FIREBASE_WEB_STORAGE_BUCKET=${{ secrets.FIREBASE_WEB_STORAGE_BUCKET }}" >> .env
+          echo "FIREBASE_WEB_MEASUREMENT_ID=${{ secrets.FIREBASE_WEB_MEASUREMENT_ID }}" >> .env
+          echo "FIREBASE_ANDROID_API_KEY=${{ secrets.FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "FIREBASE_ANDROID_APP_ID=${{ secrets.FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "FIREBASE_ANDROID_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_ANDROID_MESSAGING_SENDER_ID }}" >> .env
+          echo "FIREBASE_ANDROID_PROJECT_ID=${{ secrets.FIREBASE_ANDROID_PROJECT_ID }}" >> .env
+          echo "FIREBASE_ANDROID_STORAGE_BUCKET=${{ secrets.FIREBASE_ANDROID_STORAGE_BUCKET }}" >> .env
+          echo "FIREBASE_IOS_API_KEY=${{ secrets.FIREBASE_IOS_API_KEY }}" >> .env
+          echo "FIREBASE_IOS_APP_ID=${{ secrets.FIREBASE_IOS_APP_ID }}" >> .env
+          echo "FIREBASE_IOS_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_IOS_MESSAGING_SENDER_ID }}" >> .env
+          echo "FIREBASE_IOS_PROJECT_ID=${{ secrets.FIREBASE_IOS_PROJECT_ID }}" >> .env
+          echo "FIREBASE_IOS_STORAGE_BUCKET=${{ secrets.FIREBASE_IOS_STORAGE_BUCKET }}" >> .env
+          echo "FIREBASE_IOS_BUNDLE_ID=${{ secrets.FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
+
       # ---------------------------
       # ROOT: Format, Analyze, Test
       # ---------------------------
