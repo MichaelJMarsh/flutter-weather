@@ -13,8 +13,8 @@ class DashboardPageScope extends ChangeNotifier {
   DashboardPageScope({
     required RemoteSettingsService remoteSettingsService,
     required WeatherService weatherService,
-  })  : _remoteSettingsService = remoteSettingsService,
-        _weatherService = weatherService;
+  }) : _remoteSettingsService = remoteSettingsService,
+       _weatherService = weatherService;
 
   /// Creates a new [DashboardPageScope] from the [context].
   factory DashboardPageScope.of(final BuildContext context) {
@@ -74,8 +74,7 @@ class DashboardPageScope extends ChangeNotifier {
       _loadDailyForecast(),
     ]);
 
-    _userSettingsSubscription =
-        _remoteSettingsService.userSettingsStream.listen(
+    _userSettingsSubscription = _remoteSettingsService.userSettingsStream.listen(
       (userSettings) {
         final didUpdateTemperatureUnit =
             _temperatureUnit != userSettings.temperatureUnit;
