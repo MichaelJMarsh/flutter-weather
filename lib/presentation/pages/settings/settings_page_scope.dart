@@ -9,11 +9,11 @@ import 'package:provider/provider.dart';
 /// of the app settings on the [SettingsPage].
 class SettingsPageScope extends ChangeNotifier {
   /// Creates a new [SettingsPageScope].
-  SettingsPageScope(
-      {required AppVersion appVersion,
-      required RemoteSettingsService remoteSettingsService})
-      : _appVersion = appVersion,
-        _remoteSettingsService = remoteSettingsService;
+  SettingsPageScope({
+    required AppVersion appVersion,
+    required RemoteSettingsService remoteSettingsService,
+  }) : _appVersion = appVersion,
+       _remoteSettingsService = remoteSettingsService;
 
   final AppVersion _appVersion;
   final RemoteSettingsService _remoteSettingsService;
@@ -55,21 +55,21 @@ class SettingsPageScope extends ChangeNotifier {
     _timeFormat = settings.timeFormat;
     _temperatureUnit = settings.temperatureUnit;
 
-    _settingsSubscription = _remoteSettingsService.userSettingsStream.listen(
-      (settings) {
-        if (_themeMode != settings.themeMode) {
-          _themeMode = settings.themeMode;
-        }
-        if (_timeFormat != settings.timeFormat) {
-          _timeFormat = settings.timeFormat;
-        }
-        if (_temperatureUnit != settings.temperatureUnit) {
-          _temperatureUnit = settings.temperatureUnit;
-        }
+    _settingsSubscription = _remoteSettingsService.userSettingsStream.listen((
+      settings,
+    ) {
+      if (_themeMode != settings.themeMode) {
+        _themeMode = settings.themeMode;
+      }
+      if (_timeFormat != settings.timeFormat) {
+        _timeFormat = settings.timeFormat;
+      }
+      if (_temperatureUnit != settings.temperatureUnit) {
+        _temperatureUnit = settings.temperatureUnit;
+      }
 
-        notifyListeners();
-      },
-    );
+      notifyListeners();
+    });
 
     _isLoading = false;
     notifyListeners();
