@@ -151,11 +151,14 @@ jobs:
       - name: Install Dependencies (root)
         run: flutter pub get
 
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
       - name: Build Android
         run: flutter build apk --release
 
       - name: Build iOS
-        run: flutter build ios
+        run: flutter build ios --no-codesign
 
       - name: Build Web
         run: flutter build web
