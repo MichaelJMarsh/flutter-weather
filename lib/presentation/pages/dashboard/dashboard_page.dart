@@ -4,11 +4,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:domain/domain.dart';
-import 'package:flutter_weather/presentation/pages/settings/settings_page.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_weather/presentation/animations/entrance_animations.dart';
+import 'package:flutter_weather/presentation/pages/settings/settings_page.dart';
 import 'package:flutter_weather/presentation/widgets/widgets.dart';
 
 import 'dashboard_page_scope.dart';
@@ -103,7 +102,11 @@ class _DashboardPageState extends State<DashboardPage>
               child: AnimatedTranslation.vertical(
                 animation: _entranceAnimations.hourlyForecast,
                 pixels: 40,
-                child: _HourlyForecastSection(hourly: hourlyForecast),
+                child: _HourlyForecastSection(
+                  hourly: hourlyForecast,
+                  formatTime: dashboardScope.formatTime,
+                  formatTemperature: dashboardScope.formatTemperature,
+                ),
               ),
             ),
             SliverToBoxAdapter(
@@ -147,7 +150,15 @@ class _DashboardPageState extends State<DashboardPage>
                   return AnimatedTranslation.vertical(
                     animation: _entranceAnimations.dailyForecastCards[index],
                     pixels: 40,
-                    child: WeekdayWeatherCard(forecast: dailyForecast[index]),
+                    child: WeekdayWeatherCard(
+                      forecast: dailyForecast[index],
+                      formatTemperature: (temperature) {
+                        return dashboardScope.formatTemperature(
+                          temperature,
+                          displayUnit: false,
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -170,8 +181,7 @@ class _DashboardPageState extends State<DashboardPage>
           );
         }
 
-        final displayFailedToLoadState =
-            currentWeather == null &&
+        final displayFailedToLoadState = currentWeather == null &&
             hourlyForecast.isEmpty &&
             dailyForecast.isEmpty;
         if (displayFailedToLoadState) {
@@ -267,10 +277,9 @@ class _CurrentWeatherSection extends StatelessWidget {
     final dashboardScope = context.watch<DashboardPageScope>();
 
     // Get today's forecast from dailyForecast
-    final todayForecast =
-        dashboardScope.dailyForecast.isNotEmpty
-            ? dashboardScope.dailyForecast.first
-            : null;
+    final todayForecast = dashboardScope.dailyForecast.isNotEmpty
+        ? dashboardScope.dailyForecast.first
+        : null;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -334,10 +343,20 @@ class _CurrentWeatherSection extends StatelessWidget {
 /// Widget for displaying a horizontal list of hourly forecasts.
 class _HourlyForecastSection extends StatelessWidget {
   /// Creates a new [_HourlyForecastSection].
-  const _HourlyForecastSection({required this.hourly});
+  const _HourlyForecastSection({
+    required this.hourly,
+    required this.formatTime,
+    required this.formatTemperature,
+  });
 
   /// List of hourly forecasts.
   final List<HourlyForecast> hourly;
+
+  /// The function to format a [DateTime] into a string.
+  final Function(DateTime) formatTime;
+
+  /// The function to format a temperature into a string.
+  final Function(double?) formatTemperature;
 
   @override
   Widget build(BuildContext context) {
@@ -353,34 +372,36 @@ class _HourlyForecastSection extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final hourData = hoursToShow[index];
-          final formattedHour = DateFormat.H().format(
-            hourData.dateTime,
-          ); // 'Mon 3 PM'
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                formattedHour,
+                formatTime(hourData.dateTime),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
-              WeatherIcon(iconCode: hourData.iconCode, size: 36),
+              WeatherIcon(iconCode: hourData.iconCode, size: 32),
               const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  '${hourData.temperature.toStringAsFixed(0)}°',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Text(
+                    formatTemperature(hourData.temperature),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

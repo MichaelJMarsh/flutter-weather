@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class SettingsPageScope extends ChangeNotifier {
   /// Creates a new [SettingsPageScope].
   SettingsPageScope({required RemoteSettingsService remoteSettingsService})
-    : _remoteSettingsService = remoteSettingsService;
+      : _remoteSettingsService = remoteSettingsService;
 
   final RemoteSettingsService _remoteSettingsService;
 
@@ -45,7 +45,7 @@ class SettingsPageScope extends ChangeNotifier {
     _timeFormat = settings.timeFormat;
     _temperatureUnit = settings.temperatureUnit;
 
-    _settingsSubscription = _remoteSettingsService.onUserSettingsChanged.listen(
+    _settingsSubscription = _remoteSettingsService.userSettingsStream.listen(
       (settings) {
         if (_themeMode != settings.themeMode) {
           _themeMode = settings.themeMode;

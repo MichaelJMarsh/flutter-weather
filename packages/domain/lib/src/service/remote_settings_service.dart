@@ -6,7 +6,7 @@ abstract class RemoteSettingsService {
   UserSettings get userSettings;
 
   /// The stream of user settings changes.
-  Stream<UserSettings> get onUserSettingsChanged;
+  Stream<UserSettings> get userSettingsStream;
 
   /// Initializes the service, by fetching the user settings for the given user
   /// and subscribing to changes.

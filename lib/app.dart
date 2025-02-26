@@ -34,12 +34,16 @@ class FlutterWeatherApp extends StatelessWidget {
         Provider.value(value: urlLauncher),
         Provider.value(value: remoteSettingsService),
         Provider.value(value: weatherService),
+        StreamProvider<UserSettings>(
+          create: (_) => remoteSettingsService.userSettingsStream,
+          initialData: remoteSettingsService.userSettings,
+        ),
       ],
       builder: (context, __) {
         final mediaQuery = MediaQuery.of(context);
 
         final themeMode = context.select(
-          (RemoteSettingsService service) => service.userSettings.themeMode,
+          (UserSettings userSettings) => userSettings.themeMode,
         );
         final theme = AppTheme.getTheme(
           mode: themeMode,
@@ -49,10 +53,9 @@ class FlutterWeatherApp extends StatelessWidget {
         return MediaQuery(
           data: mediaQuery.copyWith(textScaler: TextScaler.noScaling),
           child: AnnotatedRegion<SystemUiOverlayStyle>(
-            value:
-                theme.colorScheme.brightness == Brightness.dark
-                    ? SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.dark,
+            value: theme.colorScheme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
             child: DefaultTextStyle(
               style: TextStyle(
                 fontSize: 16,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import 'package:domain/domain.dart';
@@ -11,8 +13,8 @@ class DashboardPageScope extends ChangeNotifier {
   DashboardPageScope({
     required RemoteSettingsService remoteSettingsService,
     required WeatherService weatherService,
-  }) : _remoteSettingsService = remoteSettingsService,
-       _weatherService = weatherService;
+  })  : _remoteSettingsService = remoteSettingsService,
+        _weatherService = weatherService;
 
   /// Creates a new [DashboardPageScope] from the [context].
   factory DashboardPageScope.of(final BuildContext context) {
@@ -25,9 +27,20 @@ class DashboardPageScope extends ChangeNotifier {
   final RemoteSettingsService _remoteSettingsService;
   final WeatherService _weatherService;
 
+  /// The subscription to the user settings stream.
+  late final StreamSubscription<UserSettings> _userSettingsSubscription;
+
   /// Whether the [DashboardPageScope] is currently loading.
   bool get isLoading => _isLoading;
   bool _isLoading = true;
+
+  /// The current temperature unit.
+  TemperatureUnit get temperatureUnit => _temperatureUnit;
+  TemperatureUnit _temperatureUnit = TemperatureUnit.celsius;
+
+  /// The current time format.
+  TimeFormat get timeFormat => _timeFormat;
+  TimeFormat _timeFormat = TimeFormat.twentyFourHour;
 
   /// The weather data for the current day.
   CurrentWeather? get currentWeather => _currentWeather;
@@ -51,35 +64,61 @@ class DashboardPageScope extends ChangeNotifier {
 
   /// Initializes the dashboard by loading weather data.
   Future<void> initialize() async {
+    final userSettings = _remoteSettingsService.userSettings;
+    _temperatureUnit = userSettings.temperatureUnit;
+    _timeFormat = userSettings.timeFormat;
+
     await Future.wait([
       _loadCurrentWeather(),
       _loadHourlyForecast(),
       _loadDailyForecast(),
     ]);
 
+    _userSettingsSubscription =
+        _remoteSettingsService.userSettingsStream.listen((userSettings) {
+      final didUpdateTemperatureUnit =
+          _temperatureUnit != userSettings.temperatureUnit;
+      if (didUpdateTemperatureUnit) {
+        _temperatureUnit = userSettings.temperatureUnit;
+      }
+
+      final didUpdateTimeFormat = _timeFormat != userSettings.timeFormat;
+      if (didUpdateTimeFormat) {
+        _timeFormat = userSettings.timeFormat;
+      }
+
+      // Only update state if the temperature unit or time format has changed.
+      if (didUpdateTemperatureUnit || didUpdateTimeFormat) {
+        notifyListeners();
+      }
+    });
+
     _isLoading = false;
     notifyListeners();
   }
 
+  @override
+  void dispose() {
+    _userSettingsSubscription.cancel();
+
+    super.dispose();
+  }
+
   /// Formats the given [temperature] into a string.
-  String formatTemperature(double? temperature) {
+  String formatTemperature(double? temperature, {bool displayUnit = true}) {
     if (temperature == null) return 'N/A';
 
-    final temperatureUnit = _remoteSettingsService.userSettings.temperatureUnit;
-
-    if (temperatureUnit == TemperatureUnit.celsius) {
-      return '${temperature.round()}°C';
+    if (_temperatureUnit == TemperatureUnit.celsius) {
+      return '${temperature.round()}°${displayUnit ? 'C' : ''}';
     }
 
     // Convert to Fahrenheit.
-    return '${(temperature * 1.8 + 32).round()}°F';
+    return '${(temperature * 1.8 + 32).round()}°${displayUnit ? 'F' : ''}';
   }
 
   /// Formats the given [time] into a string.
   String formatTime(DateTime time) {
-    final timeFormat = _remoteSettingsService.userSettings.timeFormat;
-
-    if (timeFormat == TimeFormat.twentyFourHour) {
+    if (_timeFormat == TimeFormat.twentyFourHour) {
       return DateFormat.H().format(time);
     }
 

@@ -11,8 +11,8 @@ class FirestoreSettingsClient implements RemoteSettingsService {
   FirestoreSettingsClient({
     required FirebaseFirestore firestore,
     required String userId,
-  }) : _userId = userId,
-       _usersCollection = firestore.collection(UserSettingsField.users);
+  })  : _userId = userId,
+        _usersCollection = firestore.collection(UserSettingsField.users);
 
   final String _userId;
   final CollectionReference _usersCollection;
@@ -24,7 +24,7 @@ class FirestoreSettingsClient implements RemoteSettingsService {
   UserSettings _userSettings = UserSettings();
 
   @override
-  Stream<UserSettings> get onUserSettingsChanged =>
+  Stream<UserSettings> get userSettingsStream =>
       _userSettingsStreamController.stream;
   final _userSettingsStreamController =
       StreamController<UserSettings>.broadcast();
@@ -40,12 +40,12 @@ class FirestoreSettingsClient implements RemoteSettingsService {
         .snapshots()
         .map((doc) => doc.exists ? _parseSettings(doc) : _userSettings)
         .listen(
-          (settings) {
-            _userSettings = settings;
-            _userSettingsStreamController.add(settings);
-          },
-          onError: (error) => debugPrint("Error listening to settings: $error"),
-        );
+      (settings) {
+        _userSettings = settings;
+        _userSettingsStreamController.add(settings);
+      },
+      onError: (error) => debugPrint("Error listening to settings: $error"),
+    );
   }
 
   @override
@@ -56,12 +56,11 @@ class FirestoreSettingsClient implements RemoteSettingsService {
 
   @override
   Future<UserSettings> get() async {
-    final doc =
-        await _usersCollection
-            .doc(_userId)
-            .collection(UserSettingsField.settings)
-            .doc(UserSettingsField.userSettings)
-            .get();
+    final doc = await _usersCollection
+        .doc(_userId)
+        .collection(UserSettingsField.settings)
+        .doc(UserSettingsField.userSettings)
+        .get();
 
     if (!doc.exists) return _userSettings;
 
