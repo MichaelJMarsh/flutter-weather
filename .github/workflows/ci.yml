@@ -7,37 +7,49 @@ on:
     branches: [main]
 
 jobs:
-  analyze_and_test:
+  check_tests_and_lint:
+    name: Check Tests & Lint
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out the repo
+      # 1) Checkout
       - name: Check out repository
         uses: actions/checkout@v3
 
-      # 2) Install Flutter
+      # 2) Setup Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          # or pin a specific version (e.g. '3.7.x')
+          # or pin a specific version (e.g., '3.7.x')
           flutter-version: "stable"
 
-      - name: Flutter Doctor (optional diagnostic)
+      - name: Flutter Doctor
         run: flutter doctor -v
 
-      # 3) Format Check at Root
-      - name: Format Check (root)
-        run: |
-          flutter format --set-exit-if-changed .
+      # ---------------------------
+      # ROOT: Format, Analyze, Test
+      # ---------------------------
+      - name: Install Dependencies (root)
+        run: flutter pub get
 
-      # 4) Lint Check (Analyze) at Root
+      - name: Format (root)
+        run: flutter format --set-exit-if-changed .
+
       - name: Analyze (root)
-        run: |
-          flutter pub get
-          flutter analyze
+        run: flutter analyze
 
-      # 5) Subpackage "data" Checks (Format, Analyze, Test)
-      - name: Format Check (packages/data)
+      - name: Test (root)
+        run: flutter test --coverage
+
+      # ------------------------------------
+      # PACKAGES/DATA: Format, Analyze, Test
+      # ------------------------------------
+      - name: Install Dependencies (packages/data)
+        run: |
+          cd packages/data
+          flutter pub get
+
+      - name: Format (packages/data)
         run: |
           cd packages/data
           flutter format --set-exit-if-changed .
@@ -45,7 +57,6 @@ jobs:
       - name: Analyze (packages/data)
         run: |
           cd packages/data
-          flutter pub get
           flutter analyze
 
       - name: Test (packages/data)
@@ -53,8 +64,15 @@ jobs:
           cd packages/data
           flutter test --coverage
 
-      # 6) Subpackage "domain" Checks (Format, Analyze, Test)
-      - name: Format Check (packages/domain)
+      # --------------------------------------
+      # PACKAGES/DOMAIN: Format, Analyze, Test
+      # --------------------------------------
+      - name: Install Dependencies (packages/domain)
+        run: |
+          cd packages/domain
+          flutter pub get
+
+      - name: Format (packages/domain)
         run: |
           cd packages/domain
           flutter format --set-exit-if-changed .
@@ -62,7 +80,6 @@ jobs:
       - name: Analyze (packages/domain)
         run: |
           cd packages/domain
-          flutter pub get
           flutter analyze
 
       - name: Test (packages/domain)
@@ -70,15 +87,10 @@ jobs:
           cd packages/domain
           flutter test --coverage
 
-      # 7) Test the Root App (if you have tests in /test)
-      - name: Test (root app)
-        run: |
-          flutter test --coverage
-
-  build_app:
-    # Only run build steps if analyze_and_test is successful.
-    needs: analyze_and_test
+  build_all_platforms:
+    name: Build App (All Platforms)
     runs-on: macos-latest
+    needs: check_tests_and_lint # Only run if tests & lint pass
 
     steps:
       - name: Check out repository
@@ -92,21 +104,17 @@ jobs:
       - name: Flutter Doctor
         run: flutter doctor -v
 
-      - name: Flutter Pub Get
+      - name: Install Dependencies (root)
         run: flutter pub get
 
-      # 1) Build Android (release)
       - name: Build Android
         run: flutter build apk --release
 
-      # 2) Build iOS (release, no codesign)
       - name: Build iOS
         run: flutter build ios --no-codesign
 
-      # 3) Build Web
       - name: Build Web
         run: flutter build web
 
-      # 4) Build macOS (release, no codesign)
       - name: Build macOS
         run: flutter build macos --no-codesign
