@@ -10,6 +10,7 @@ export 'src/model/user_settings.dart';
 export 'src/model/weather_forecast.dart';
 
 // Services
+export 'src/service/app_version.dart';
 export 'src/service/authentication_service.dart';
 export 'src/service/remote_settings_service.dart';
 export 'src/service/share.dart';

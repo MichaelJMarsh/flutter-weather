@@ -9,14 +9,21 @@ import 'package:provider/provider.dart';
 /// of the app settings on the [SettingsPage].
 class SettingsPageScope extends ChangeNotifier {
   /// Creates a new [SettingsPageScope].
-  SettingsPageScope({required RemoteSettingsService remoteSettingsService})
-      : _remoteSettingsService = remoteSettingsService;
+  SettingsPageScope(
+      {required AppVersion appVersion,
+      required RemoteSettingsService remoteSettingsService})
+      : _appVersion = appVersion,
+        _remoteSettingsService = remoteSettingsService;
 
+  final AppVersion _appVersion;
   final RemoteSettingsService _remoteSettingsService;
 
   /// Creates a new [SettingsPageScope] from the [context].
   factory SettingsPageScope.of(final BuildContext context) {
-    return SettingsPageScope(remoteSettingsService: context.read());
+    return SettingsPageScope(
+      appVersion: context.read(),
+      remoteSettingsService: context.read(),
+    );
   }
 
   /// The subscription to the user settings.
@@ -37,6 +44,9 @@ class SettingsPageScope extends ChangeNotifier {
   /// The selected time format for the app.
   TimeFormat get timeFormat => _timeFormat;
   TimeFormat _timeFormat = TimeFormat.twentyFourHour;
+
+  /// The current app version.
+  String get appVersion => _appVersion.currentVersion;
 
   /// Initializes the settings by fetching the current settings from Firebase.
   Future<void> initialize() async {

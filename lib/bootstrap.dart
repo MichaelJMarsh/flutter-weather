@@ -37,6 +37,8 @@ class Bootstrap {
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     return FlutterWeatherApp(
+      appVersion: AppVersionPlugin(delegate: AppVersionDelegate())
+        ..getAppVersion(),
       share: SharePlugin(delegate: ShareDelegate()),
       urlLauncher: UrlLauncherPlugin(delegate: UrlLauncherDelegate()),
       remoteSettingsService: FirestoreSettingsClient(

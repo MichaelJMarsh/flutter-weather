@@ -50,7 +50,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
 
     _entranceAnimationsStartTimer = Timer(
-      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 250),
       _entranceAnimationsController.forward,
     );
   }

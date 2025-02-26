@@ -45,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage>
     );
 
     _entranceAnimationsStartTimer = Timer(
-      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 250),
       _entranceAnimationsController.forward,
     );
   }
@@ -170,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage>
                               pixels: 40,
                               child: Center(
                                 child: Text(
-                                  'Version 1.0.0',
+                                  'Version ${settings.appVersion}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,

@@ -14,12 +14,14 @@ class FlutterWeatherApp extends StatelessWidget {
   /// Creates a new [FlutterWeatherApp].
   const FlutterWeatherApp({
     super.key,
+    required this.appVersion,
     required this.share,
     required this.urlLauncher,
     required this.remoteSettingsService,
     required this.weatherService,
   });
 
+  final AppVersion appVersion;
   final Share share;
   final UrlLauncher urlLauncher;
 
@@ -30,6 +32,7 @@ class FlutterWeatherApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider.value(value: appVersion),
         Provider.value(value: share),
         Provider.value(value: urlLauncher),
         Provider.value(value: remoteSettingsService),
