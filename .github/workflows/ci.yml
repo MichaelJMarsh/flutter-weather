@@ -32,7 +32,7 @@ jobs:
         run: flutter pub get
 
       - name: Format (root)
-        run: flutter format --set-exit-if-changed .
+        run: dart format --set-exit-if-changed .
 
       - name: Analyze (root)
         run: flutter analyze
@@ -51,7 +51,7 @@ jobs:
       - name: Format (packages/data)
         run: |
           cd packages/data
-          flutter format --set-exit-if-changed .
+          dart format --set-exit-if-changed .
 
       - name: Analyze (packages/data)
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Format (packages/domain)
         run: |
           cd packages/domain
-          flutter format --set-exit-if-changed .
+          dart format --set-exit-if-changed .
 
       - name: Analyze (packages/domain)
         run: |
