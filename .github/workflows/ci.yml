@@ -155,10 +155,10 @@ jobs:
         run: flutter build apk --release
 
       - name: Build iOS
-        run: flutter build ios --no-codesign
+        run: flutter build ios
 
       - name: Build Web
         run: flutter build web
 
       - name: Build macOS
-        run: flutter build macos --no-codesign
+        run: flutter build macos
