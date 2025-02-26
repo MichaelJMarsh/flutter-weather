@@ -44,9 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Firebase auto-generated files (DO NOT COMMIT)
-lib/config/firebase_options.dart
-
 # Dotenv configuration file (contains secrets)
 .env
 .env*
