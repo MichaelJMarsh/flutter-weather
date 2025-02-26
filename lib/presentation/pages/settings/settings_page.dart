@@ -97,95 +97,97 @@ class _SettingsPageState extends State<SettingsPage>
                 ],
               );
             },
-            child: settings.isLoading
-                ? const Padding(
-                    padding: EdgeInsets.only(bottom: kToolbarHeight),
-                    child: LoadingLayout(
-                      message: Text('Loading settings data...'),
-                    ),
-                  )
-                : CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    slivers: [
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        sliver: SliverList(
-                          delegate: SliverChildListDelegate([
-                            AnimatedTranslation.vertical(
-                              animation: _entranceAnimations.themeCard,
-                              pixels: 40,
-                              child: _ThemePickerCard(
-                                themeMode: settings.themeMode,
-                                toggleThemeMode: settings.toggleThemeMode,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            AnimatedTranslation.vertical(
-                              animation: _entranceAnimations.unitsCard,
-                              pixels: 40,
-                              child: Card(
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(24),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text('Time Format'),
-                                      ChipPicker<TimeFormat>(
-                                        options: TimeFormat.values,
-                                        initialOption: settings.timeFormat,
-                                        labelBuilder: (option) =>
-                                            option.displayText,
-                                        onOptionSelected:
-                                            settings.setTimeFormat,
-                                      ),
-                                      Divider(
-                                        color: colorScheme.onSurface
-                                            .withValues(alpha: 0.16),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      const Text('Temperature Unit'),
-                                      ChipPicker<TemperatureUnit>(
-                                        options: TemperatureUnit.values,
-                                        initialOption: settings.temperatureUnit,
-                                        labelBuilder: (option) =>
-                                            option.displayText,
-                                        onOptionSelected:
-                                            settings.setTemperatureUnit,
-                                      ),
-                                    ],
-                                  ),
+            child:
+                settings.isLoading
+                    ? const Padding(
+                      padding: EdgeInsets.only(bottom: kToolbarHeight),
+                      child: LoadingLayout(
+                        message: Text('Loading settings data...'),
+                      ),
+                    )
+                    : CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.themeCard,
+                                pixels: 40,
+                                child: _ThemePickerCard(
+                                  themeMode: settings.themeMode,
+                                  toggleThemeMode: settings.toggleThemeMode,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 32),
-                            AnimatedTranslation.vertical(
-                              animation: _entranceAnimations.appVersion,
-                              pixels: 40,
-                              child: Center(
-                                child: Text(
-                                  'VERSION ${settings.appVersion}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface.withValues(
-                                      alpha: 0.48,
+                              const SizedBox(height: 8),
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.unitsCard,
+                                pixels: 40,
+                                child: Card(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(24),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text('Time Format'),
+                                        ChipPicker<TimeFormat>(
+                                          options: TimeFormat.values,
+                                          initialOption: settings.timeFormat,
+                                          labelBuilder:
+                                              (option) => option.displayText,
+                                          onOptionSelected:
+                                              settings.setTimeFormat,
+                                        ),
+                                        Divider(
+                                          color: colorScheme.onSurface
+                                              .withValues(alpha: 0.16),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        const Text('Temperature Unit'),
+                                        ChipPicker<TemperatureUnit>(
+                                          options: TemperatureUnit.values,
+                                          initialOption:
+                                              settings.temperatureUnit,
+                                          labelBuilder:
+                                              (option) => option.displayText,
+                                          onOptionSelected:
+                                              settings.setTemperatureUnit,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ]),
+                              const SizedBox(height: 32),
+                              AnimatedTranslation.vertical(
+                                animation: _entranceAnimations.appVersion,
+                                pixels: 40,
+                                child: Center(
+                                  child: Text(
+                                    'VERSION ${settings.appVersion}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurface.withValues(
+                                        alpha: 0.48,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
           ),
         );
       },

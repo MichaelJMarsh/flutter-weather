@@ -5,7 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 class AppVersionPlugin implements AppVersion {
   /// Creates a new [AppVersionPlugin].
   AppVersionPlugin({required AppVersionDelegate delegate})
-      : _delegate = delegate;
+    : _delegate = delegate;
 
   final AppVersionDelegate _delegate;
 
