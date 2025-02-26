@@ -164,13 +164,13 @@ class _SettingsPageState extends State<SettingsPage>
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 32),
                             AnimatedTranslation.vertical(
                               animation: _entranceAnimations.appVersion,
                               pixels: 40,
                               child: Center(
                                 child: Text(
-                                  'Version ${settings.appVersion}',
+                                  'VERSION ${settings.appVersion}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,

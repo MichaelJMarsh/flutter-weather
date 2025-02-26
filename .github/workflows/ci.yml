@@ -1,0 +1,112 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Check out the repo
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 2) Install Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # or pin a specific version (e.g. '3.7.x')
+          flutter-version: "stable"
+
+      - name: Flutter Doctor (optional diagnostic)
+        run: flutter doctor -v
+
+      # 3) Format Check at Root
+      - name: Format Check (root)
+        run: |
+          flutter format --set-exit-if-changed .
+
+      # 4) Lint Check (Analyze) at Root
+      - name: Analyze (root)
+        run: |
+          flutter pub get
+          flutter analyze
+
+      # 5) Subpackage "data" Checks (Format, Analyze, Test)
+      - name: Format Check (packages/data)
+        run: |
+          cd packages/data
+          flutter format --set-exit-if-changed .
+
+      - name: Analyze (packages/data)
+        run: |
+          cd packages/data
+          flutter pub get
+          flutter analyze
+
+      - name: Test (packages/data)
+        run: |
+          cd packages/data
+          flutter test --coverage
+
+      # 6) Subpackage "domain" Checks (Format, Analyze, Test)
+      - name: Format Check (packages/domain)
+        run: |
+          cd packages/domain
+          flutter format --set-exit-if-changed .
+
+      - name: Analyze (packages/domain)
+        run: |
+          cd packages/domain
+          flutter pub get
+          flutter analyze
+
+      - name: Test (packages/domain)
+        run: |
+          cd packages/domain
+          flutter test --coverage
+
+      # 7) Test the Root App (if you have tests in /test)
+      - name: Test (root app)
+        run: |
+          flutter test --coverage
+
+  build_app:
+    # Only run build steps if analyze_and_test is successful.
+    needs: analyze_and_test
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "stable"
+
+      - name: Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      # 1) Build Android (release)
+      - name: Build Android
+        run: flutter build apk --release
+
+      # 2) Build iOS (release, no codesign)
+      - name: Build iOS
+        run: flutter build ios --no-codesign
+
+      # 3) Build Web
+      - name: Build Web
+        run: flutter build web
+
+      # 4) Build macOS (release, no codesign)
+      - name: Build macOS
+        run: flutter build macos --no-codesign
