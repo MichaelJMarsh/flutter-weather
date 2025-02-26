@@ -13,8 +13,8 @@ class DashboardPageScope extends ChangeNotifier {
   DashboardPageScope({
     required RemoteSettingsService remoteSettingsService,
     required WeatherService weatherService,
-  }) : _remoteSettingsService = remoteSettingsService,
-       _weatherService = weatherService;
+  })  : _remoteSettingsService = remoteSettingsService,
+        _weatherService = weatherService;
 
   /// Creates a new [DashboardPageScope] from the [context].
   factory DashboardPageScope.of(final BuildContext context) {
@@ -74,7 +74,8 @@ class DashboardPageScope extends ChangeNotifier {
       _loadDailyForecast(),
     ]);
 
-    _userSettingsSubscription = _remoteSettingsService.userSettingsStream.listen(
+    _userSettingsSubscription =
+        _remoteSettingsService.userSettingsStream.listen(
       (userSettings) {
         final didUpdateTemperatureUnit =
             _temperatureUnit != userSettings.temperatureUnit;
@@ -119,11 +120,13 @@ class DashboardPageScope extends ChangeNotifier {
 
   /// Formats the given [time] into a string.
   String formatTime(DateTime time) {
+    final localTime = time.toLocal();
+
     if (_timeFormat == TimeFormat.twentyFourHour) {
-      return DateFormat.H().format(time);
+      return DateFormat.H().format(localTime);
     }
 
-    return DateFormat.j().format(time);
+    return DateFormat.j().format(localTime);
   }
 
   /// Loads the current weather.
