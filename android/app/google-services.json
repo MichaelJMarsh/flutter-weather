@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:126812901932:android:368410e5934ac09ac7b789",
         "android_client_info": {
-          "package_name": "com.example.flutter_weather"
+          "package_name": "com.flutterweather"
         }
       },
       "oauth_client": [],
