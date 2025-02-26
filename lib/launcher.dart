@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeMode;
+
+import 'package:domain/domain.dart';
 
 import 'package:flutter_weather/presentation/widgets/widgets.dart';
 
@@ -66,7 +68,8 @@ class _LauncherState extends State<Launcher> {
 
     return Theme(
       data: AppTheme.getTheme(
-        platformBrightness: mediaQuery.platformBrightness,
+        mode: ThemeMode.system,
+        brightness: mediaQuery.platformBrightness,
       ),
       child: Builder(
         builder: (context) {

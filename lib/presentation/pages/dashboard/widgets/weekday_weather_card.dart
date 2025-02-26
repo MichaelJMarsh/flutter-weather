@@ -8,10 +8,17 @@ import 'package:flutter_weather/presentation/widgets/widgets.dart';
 /// The card containing the weather forecast for a specific day.
 class WeekdayWeatherCard extends StatelessWidget {
   /// Creates a new [WeekdayWeatherCard].
-  const WeekdayWeatherCard({super.key, required this.forecast});
+  const WeekdayWeatherCard({
+    super.key,
+    required this.forecast,
+    required this.formatTemperature,
+  });
 
   /// The forecast for the current day.
   final DailyForecast forecast;
+
+  /// The function to format a temperature into a string.
+  final Function(double?) formatTemperature;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +29,6 @@ class WeekdayWeatherCard extends StatelessWidget {
 
     final minTemp = forecast.minTemperature;
     final maxTemp = forecast.maxTemperature;
-    final minTempString = minTemp.toStringAsFixed(0);
-    final maxTempString = maxTemp.toStringAsFixed(0);
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -62,7 +67,7 @@ class WeekdayWeatherCard extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      '$minTempString°',
+                      formatTemperature(minTemp),
                       style: TextStyle(
                         color: colorScheme.onSurface.withValues(alpha: 0.48),
                       ),
@@ -84,7 +89,7 @@ class WeekdayWeatherCard extends StatelessWidget {
                 child: Center(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('$maxTempString°'),
+                    child: Text(formatTemperature(maxTemp)),
                   ),
                 ),
               ),
@@ -211,7 +216,6 @@ class _TemperatureProgressBarState extends State<_TemperatureProgressBar> {
               color: colorScheme.onSurface.withValues(alpha: 0.08),
               borderRadius: borderRadius,
             ),
-
             child: Align(
               alignment: Alignment.centerLeft,
               child: ClipRRect(

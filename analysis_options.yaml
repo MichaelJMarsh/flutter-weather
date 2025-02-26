@@ -6,3 +6,10 @@ analyzer:
     prefer_const_declarations: error
     prefer_const_literals_to_create_immutables: error
     unnecessary_const: error
+
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - unnecessary_const
