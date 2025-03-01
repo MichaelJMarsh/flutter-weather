@@ -162,6 +162,3 @@ jobs:
 
       - name: Build Web
         run: flutter build web
-
-      - name: Build macOS
-        run: flutter build macos
