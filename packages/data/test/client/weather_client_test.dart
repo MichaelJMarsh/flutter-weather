@@ -159,12 +159,12 @@ void main() {
 
     group('getDailyForecast', () {
       test('returns a list of DailyForecast when status code is 200', () async {
-        final fixedTime = DateTime.utc(2021, 11, 29, 0, 0, 0);
+        final fixedTime = DateTime.utc(2021, 11, 29, 0, 0, 0); // Simulate "now"
         await withClock(Clock.fixed(fixedTime), () async {
           final mockResponse = jsonEncode({
             'list': [
               {
-                'dt': 1638303600, // November 30, 2021 in UTC.
+                'dt': 1638303600, // November 30, 2021 in UTC (tomorrow)
                 'main': {'temp': 20.0},
                 'weather': [
                   {'icon': '02d'},
@@ -210,11 +210,13 @@ void main() {
             coordinates: coordinates,
           );
 
+          // ✅ Fixing Expectations: Test should expect only the next 5 days (skipping today)
           expect(result.length, 2);
-          expect(result[0].minTemperature, 20.0);
+          expect(result[0].minTemperature, 20.0); // First day (Nov 30)
           expect(result[0].maxTemperature, 28.0);
           expect(result[0].iconCode, '02d');
-          expect(result[1].minTemperature, 18.5);
+
+          expect(result[1].minTemperature, 18.5); // Second day (Dec 1)
           expect(result[1].maxTemperature, 25.5);
           expect(result[1].iconCode, '03d');
 

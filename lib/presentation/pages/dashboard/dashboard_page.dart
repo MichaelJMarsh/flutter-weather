@@ -181,7 +181,8 @@ class _DashboardPageState extends State<DashboardPage>
           );
         }
 
-        final displayFailedToLoadState = currentWeather == null &&
+        final displayFailedToLoadState =
+            currentWeather == null &&
             hourlyForecast.isEmpty &&
             dailyForecast.isEmpty;
         if (displayFailedToLoadState) {
@@ -277,9 +278,10 @@ class _CurrentWeatherSection extends StatelessWidget {
     final dashboardScope = context.watch<DashboardPageScope>();
 
     // Get today's forecast from dailyForecast
-    final todayForecast = dashboardScope.dailyForecast.isNotEmpty
-        ? dashboardScope.dailyForecast.first
-        : null;
+    final todayForecast =
+        dashboardScope.dailyForecast.isNotEmpty
+            ? dashboardScope.dailyForecast.first
+            : null;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

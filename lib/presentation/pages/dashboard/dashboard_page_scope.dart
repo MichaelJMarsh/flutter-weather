@@ -13,8 +13,8 @@ class DashboardPageScope extends ChangeNotifier {
   DashboardPageScope({
     required RemoteSettingsService remoteSettingsService,
     required WeatherService weatherService,
-  })  : _remoteSettingsService = remoteSettingsService,
-        _weatherService = weatherService;
+  }) : _remoteSettingsService = remoteSettingsService,
+       _weatherService = weatherService;
 
   /// Creates a new [DashboardPageScope] from the [context].
   factory DashboardPageScope.of(final BuildContext context) {
@@ -74,24 +74,25 @@ class DashboardPageScope extends ChangeNotifier {
       _loadDailyForecast(),
     ]);
 
-    _userSettingsSubscription =
-        _remoteSettingsService.userSettingsStream.listen((userSettings) {
-      final didUpdateTemperatureUnit =
-          _temperatureUnit != userSettings.temperatureUnit;
-      if (didUpdateTemperatureUnit) {
-        _temperatureUnit = userSettings.temperatureUnit;
-      }
+    _userSettingsSubscription = _remoteSettingsService.userSettingsStream.listen(
+      (userSettings) {
+        final didUpdateTemperatureUnit =
+            _temperatureUnit != userSettings.temperatureUnit;
+        if (didUpdateTemperatureUnit) {
+          _temperatureUnit = userSettings.temperatureUnit;
+        }
 
-      final didUpdateTimeFormat = _timeFormat != userSettings.timeFormat;
-      if (didUpdateTimeFormat) {
-        _timeFormat = userSettings.timeFormat;
-      }
+        final didUpdateTimeFormat = _timeFormat != userSettings.timeFormat;
+        if (didUpdateTimeFormat) {
+          _timeFormat = userSettings.timeFormat;
+        }
 
-      // Only update state if the temperature unit or time format has changed.
-      if (didUpdateTemperatureUnit || didUpdateTimeFormat) {
-        notifyListeners();
-      }
-    });
+        // Only update state if the temperature unit or time format has changed.
+        if (didUpdateTemperatureUnit || didUpdateTimeFormat) {
+          notifyListeners();
+        }
+      },
+    );
 
     _isLoading = false;
     notifyListeners();
@@ -118,11 +119,13 @@ class DashboardPageScope extends ChangeNotifier {
 
   /// Formats the given [time] into a string.
   String formatTime(DateTime time) {
+    final localTime = time.toLocal();
+
     if (_timeFormat == TimeFormat.twentyFourHour) {
-      return DateFormat.H().format(time);
+      return DateFormat.H().format(localTime);
     }
 
-    return DateFormat.j().format(time);
+    return DateFormat.j().format(localTime);
   }
 
   /// Loads the current weather.

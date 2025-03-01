@@ -61,22 +61,24 @@ class _ChipPickerState<T> extends State<ChipPicker<T>> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 8,
-      children: widget.options.map((option) {
-        final isSelected = option == _selectedOption;
+      children:
+          widget.options.map((option) {
+            final isSelected = option == _selectedOption;
 
-        final labelColor = isSelected ? selectedColor : colorScheme.onSurface;
+            final labelColor =
+                isSelected ? selectedColor : colorScheme.onSurface;
 
-        return ChoiceChip(
-          label: Text(widget.labelBuilder(option)),
-          selected: isSelected,
-          onSelected: (_) => _selectChip(option),
-          selectedColor: colorScheme.primary.withValues(alpha: 0.24),
-          labelStyle: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: labelColor,
-          ),
-        );
-      }).toList(),
+            return ChoiceChip(
+              label: Text(widget.labelBuilder(option)),
+              selected: isSelected,
+              onSelected: (_) => _selectChip(option),
+              selectedColor: colorScheme.primary.withValues(alpha: 0.24),
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: labelColor,
+              ),
+            );
+          }).toList(),
     );
   }
 }

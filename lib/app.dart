@@ -56,9 +56,10 @@ class FlutterWeatherApp extends StatelessWidget {
         return MediaQuery(
           data: mediaQuery.copyWith(textScaler: TextScaler.noScaling),
           child: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: theme.colorScheme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
+            value:
+                theme.colorScheme.brightness == Brightness.dark
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
             child: DefaultTextStyle(
               style: TextStyle(
                 fontSize: 16,

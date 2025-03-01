@@ -48,7 +48,7 @@ class WeatherClient implements WeatherService {
     final jsonBody = json.decode(response.body) as Map<String, dynamic>;
     final currentWeather = CurrentWeather.fromJson(jsonBody);
 
-    return currentWeather.copyWith(dateTime: currentWeather.dateTime.toLocal());
+    return currentWeather.copyWith(dateTime: currentWeather.dateTime);
   }
 
   @override
@@ -94,10 +94,10 @@ class WeatherClient implements WeatherService {
     );
     final response = await _client.get(uri);
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == _HttpStatusCode.unauthorized.code) {
       throw InvalidApiKeyException();
     }
-    if (response.statusCode != 200) {
+    if (response.statusCode != _HttpStatusCode.successful.code) {
       throw Exception(
         'Failed to load daily forecast. '
         'Status code: ${response.statusCode}\nResponse: ${response.body}',
@@ -107,60 +107,70 @@ class WeatherClient implements WeatherService {
     final jsonBody = json.decode(response.body) as Map<String, dynamic>;
     final List<dynamic> forecastList = jsonBody['list'] ?? [];
 
-    // We'll group 3-hour forecasts by their *local* day.
     final groupedByDay = <int, List<HourlyForecast>>{};
 
-    // Convert "today" to local time.
-    final nowUtc = clock.now(); // This is UTC or system time
-    final nowLocal = nowUtc.toLocal();
-    final localToday = DateTime(nowLocal.year, nowLocal.month, nowLocal.day);
-    final localTomorrow = localToday.add(const Duration(days: 1));
+    // Get today's UTC date (to skip current day's forecasts)
+    final nowUtc = clock.now().toUtc();
+    final todayUtc = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day);
 
     for (final data in forecastList) {
       final hourlyData = HourlyForecast.fromJson(data as Map<String, dynamic>);
 
-      // Convert forecast time to local.
-      final localDateTime = hourlyData.dateTime.toLocal();
-      // Group by "year/month/day" in local time.
-      final forecastDate = DateTime(
-        localDateTime.year,
-        localDateTime.month,
-        localDateTime.day,
+      // Convert dt (provided in seconds) into UTC DateTime.
+      final utcDateTime = DateTime.fromMillisecondsSinceEpoch(
+        hourlyData.timestamp * 1000,
+        isUtc: true,
       );
 
-      // Skip today if you want to start from tomorrow:
-      if (forecastDate.isBefore(localTomorrow)) {
-        continue;
-      }
+      // If the forecast falls in the first hour (e.g. 00:xx), adjust it to the previous day.
+      final adjustedUtcDateTime =
+          utcDateTime.hour < 1
+              ? utcDateTime.subtract(const Duration(hours: 1))
+              : utcDateTime;
 
-      // Group by the day (in local time).
+      final forecastDate = DateTime.utc(
+        adjustedUtcDateTime.year,
+        adjustedUtcDateTime.month,
+        adjustedUtcDateTime.day,
+      );
+
+      // Skip if the forecast is for today.
+      if (forecastDate.isAtSameMomentAs(todayUtc)) continue;
+
       final dayKey = forecastDate.millisecondsSinceEpoch;
       groupedByDay.putIfAbsent(dayKey, () => []).add(hourlyData);
     }
 
+    // Convert each group into a DailyForecast.
     final dailyForecasts =
         groupedByDay.values.map((forecasts) {
-          // Sort each day's 3-hour block by time, just in case
+          // Sort forecasts chronologically.
           forecasts.sort((a, b) => a.dateTime.compareTo(b.dateTime));
           final firstEntry = forecasts.first;
 
-          final hourlyTemperatures = forecasts.map((f) => f.temperature);
-          final minTemp = hourlyTemperatures.reduce((a, b) => a < b ? a : b);
-          final maxTemp = hourlyTemperatures.reduce((a, b) => a > b ? a : b);
+          final minTemp = forecasts
+              .map((f) => f.temperature)
+              .reduce((a, b) => a < b ? a : b);
+          final maxTemp = forecasts
+              .map((f) => f.temperature)
+              .reduce((a, b) => a > b ? a : b);
 
           return DailyForecast(
             timestamp: firstEntry.timestamp,
-            // We want the local date/time for display
-            dateTime: firstEntry.dateTime.toLocal(),
+            dateTime: DateTime.fromMillisecondsSinceEpoch(
+              firstEntry.timestamp * 1000,
+              isUtc: true,
+            ),
             minTemperature: minTemp,
             maxTemperature: maxTemp,
             iconCode: firstEntry.iconCode ?? '01d',
           );
         }).toList();
 
-    // Sort final daily list by date.
+    // Sort the final list by date.
     dailyForecasts.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    return dailyForecasts.toList();
+
+    return dailyForecasts;
   }
 
   /// Returns the Uri for the [path] with the given [coordinates].
